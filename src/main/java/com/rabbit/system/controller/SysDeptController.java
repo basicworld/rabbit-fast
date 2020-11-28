@@ -19,6 +19,8 @@ import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TreeSelect;
 import com.rabbit.system.constant.DeptConstants;
 import com.rabbit.system.domain.SysDept;
+import com.rabbit.system.domain.SysDeptRole;
+import com.rabbit.system.service.ISysDeptRoleService;
 import com.rabbit.system.service.ISysDeptService;
 
 @RestController
@@ -26,11 +28,25 @@ import com.rabbit.system.service.ISysDeptService;
 public class SysDeptController {
 	@Autowired
 	ISysDeptService deptService;
+	
+	@Autowired
+	ISysDeptRoleService deptRoleService;
 
 	@GetMapping("/list")
 	public AjaxResult list(SysDept dept) {
 		List<SysDept> itemList = deptService.listByDept(dept);
 		return AjaxResult.success(itemList);
+	}
+	@GetMapping("/{deptId}")
+	public AjaxResult getDetail(@PathVariable Long deptId) {
+		SysDept dept = deptService.selectByPrimaryKey(deptId);
+		if(StringUtils.isNull(dept)) {
+			return AjaxResult.error("部门不存在");
+		}
+		List<SysDeptRole> deptRoleList = deptRoleService.listByDeptId(deptId);
+		Long[] roleIds = deptRoleList.stream().map(v->v.getRoleId()).toArray(Long[]::new);
+		dept.setRoleIds(roleIds);
+ 		return AjaxResult.success(dept);
 	}
 
 	@GetMapping("/tree")

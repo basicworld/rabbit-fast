@@ -31,4 +31,12 @@ public interface ISysDeptUserService extends BaseService<SysDeptUser> {
 	Integer insertByUser(SysUser user);
 
 	Integer updateByUser(SysUser user);
+
+	/**
+	 * 根据用户ID查询部门关联，逻辑前提：每个用户只属于一个部门
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	SysDeptUser selectByUserId(Long userId);
 }

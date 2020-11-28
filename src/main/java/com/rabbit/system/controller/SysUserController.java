@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.pagehelper.PageInfo;
 import com.rabbit.common.util.BCryptUtils;
 import com.rabbit.common.util.SecurityUtils;
+import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
@@ -28,6 +29,9 @@ import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
 import com.rabbit.system.service.ISysAccountService;
+import com.rabbit.system.service.ISysDeptService;
+import com.rabbit.system.service.ISysDeptUserService;
+import com.rabbit.system.service.ISysUserRoleService;
 import com.rabbit.system.service.ISysUserService;
 
 @RestController
@@ -38,25 +42,39 @@ public class SysUserController extends BaseController {
 	ISysUserService userService;
 	@Autowired
 	ISysAccountService accountService;
+	@Autowired
+	ISysDeptService deptService;
+	@Autowired
+	ISysDeptUserService deptUserService;
+	@Autowired
+	ISysUserRoleService userRoleService;
 	/**
 	 * 默认明文密码
 	 */
 	@Value("${user.defaultPassword}")
 	private String DEFAULT_RAW_PASSWORD;
 
+	/**
+	 * 按账号模糊查询，前端以用户为维度展示
+	 * 
+	 * @param userDTO
+	 * @return
+	 */
 	@GetMapping("/list")
 	public TableDataInfo list(SysUserDTO userDTO) {
 		startPage();
-		List<SysAccount> accountList = accountService.listByUserDTO(userDTO);
-
+		List<SysUser> userList = userService.listByUserDTO(userDTO);
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Long total = new PageInfo(accountList).getTotal();
-		List<SysUser> userList = userService.account2User(accountList);
-		logger.debug("userList: " + userList);
+		Long total = new PageInfo(userList).getTotal();
 		List<SysUserDTO> userDTOList = new ArrayList<SysUserDTO>();
-		for (SysUser user : userList) {
-			userDTOList.add(new SysUserDTO(user));
+		if (StringUtils.isNotEmpty(userList)) {
+			for (SysUser user : userList) {
+				user.setAllAccounts(accountService.listByUserId(user.getId()));
+				SysUserDTO dto = userService.user2dto(user);
+				userDTOList.add(dto);
+			}
 		}
+
 		return getDataTable(userDTOList, total);
 	}
 
@@ -74,8 +92,10 @@ public class SysUserController extends BaseController {
 		String salt = SecurityUtils.genSalt();
 		String encodePassword = BCryptUtils.encode(DEFAULT_RAW_PASSWORD + salt);
 		userDTO.setPassword(encodePassword);
-		SysUser user = new SysUser(userDTO);
+
+		SysUser user = userService.dto2User(userDTO);
 		user.setSalt(salt);
+		user.setPassword(encodePassword);
 
 		ValidResult checkResult = userService.validCheckBeforeInsert(user);
 		if (checkResult.hasError()) {
@@ -86,18 +106,44 @@ public class SysUserController extends BaseController {
 	}
 
 	/**
+	 * 获取详情
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	@GetMapping("/{userId}")
+	public AjaxResult getDetail(@PathVariable Long userId) {
+		SysUser user = userService.selectByPrimaryKey(userId);
+		if (StringUtils.isNull(user)) {
+			return AjaxResult.error("用户不存在");
+		}
+
+		List<SysAccount> accounts = accountService.listByUserId(userId);
+		user.setAllAccounts(accounts);
+		// 添加角色信息
+		Long[] roleIds = userRoleService.listByUserId(userId).stream().map(v -> v.getRoleId()).toArray(Long[]::new);
+		user.setRoleIds(roleIds);
+
+		SysUserDTO dto = userService.user2dto(user);
+
+		return AjaxResult.success(dto);
+	}
+
+	/**
 	 * 删除
 	 * 
 	 * @param userId
 	 * @return
 	 */
-	@DeleteMapping("/{userId}")
-	public AjaxResult delete(@PathVariable Long userId) {
-		ValidResult checkResult = userService.validCheckBeforeDelete(userId);
-		if (checkResult.hasError()) {
-			return AjaxResult.error(checkResult.getMessage());
+	@DeleteMapping("/{userIds}")
+	public AjaxResult delete(@PathVariable Long[] userIds) {
+		for (Long userId : userIds) {
+			ValidResult checkResult = userService.validCheckBeforeDelete(userId);
+			if (checkResult.hasError()) {
+				return AjaxResult.error(checkResult.getMessage());
+			}
 		}
-		userService.deleteByPrimaryKeyLogically(userId);
+		userService.deleteByPrimaryKeyLogically(userIds);
 		return AjaxResult.success();
 	}
 
@@ -109,7 +155,7 @@ public class SysUserController extends BaseController {
 	 */
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysUserDTO userDTO) {
-		SysUser user = new SysUser(userDTO);
+		SysUser user = userService.dto2User(userDTO);
 		ValidResult checkResult = userService.validCheckBeforeUpdate(user);
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());

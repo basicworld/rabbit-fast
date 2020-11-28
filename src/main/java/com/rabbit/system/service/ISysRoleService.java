@@ -31,4 +31,12 @@ public interface ISysRoleService extends BaseService<SysRole>, ValidCheckService
 	 */
 	List<SysRole> listByRole(SysRole role);
 
+	/**
+	 * 批量删除
+	 * 
+	 * @param roleIds
+	 * @return
+	 */
+	Integer deleteByPrimaryKey(Long[] roleIds);
+
 }

@@ -48,4 +48,12 @@ public interface ISysDeptRoleService extends BaseService<SysDeptRole> {
 	 * @return
 	 */
 	Integer updateByDept(SysDept dept);
+
+	/**
+	 * 根据部门ID删除
+	 * 
+	 * @param id
+	 * @return
+	 */
+	Integer deleteByDeptId(Long deptId);
 }

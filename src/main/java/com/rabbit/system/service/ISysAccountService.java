@@ -6,6 +6,7 @@ import com.rabbit.common.util.valid.ValidCheckService;
 import com.rabbit.common.util.valid.ValidResult;
 import com.rabbit.system.base.BaseService;
 import com.rabbit.system.domain.SysAccount;
+import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
 
 public interface ISysAccountService extends BaseService<SysAccount>, ValidCheckService<SysAccount> {
@@ -59,15 +60,13 @@ public interface ISysAccountService extends BaseService<SysAccount>, ValidCheckS
 	 */
 	Integer deleteByUserIdAndCategory(SysAccount account);
 
+	Integer updateByUser(SysUser user);
+
 	/**
-	 * 选择性新增或更新：<br>
-	 * 如果userid+category+openCode相同，则不操作<br>
-	 * ，如果userid+category存在，但openCode不同，则更新openCode <br>
-	 * ，如果userid+category不存在，则新增<br>
-	 * 逻辑前提：每个用户、每个账号类型只能有一个账号
+	 * 批量删除账号，如果用户所有账号均已删除，则逻辑删除用户
 	 * 
-	 * @param account
+	 * @param accountIds
 	 * @return
 	 */
-	Integer insertOrUpdateSelective(SysAccount account);
+	Integer deleteByPrimaryKey(Long[] accountIds);
 }

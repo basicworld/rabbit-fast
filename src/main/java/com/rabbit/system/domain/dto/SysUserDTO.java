@@ -1,10 +1,8 @@
 package com.rabbit.system.domain.dto;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.rabbit.common.util.StringUtils;
 import com.rabbit.system.domain.SysUser;
 
 /**
@@ -17,6 +15,7 @@ public class SysUserDTO {
 	 * SysUser.id
 	 */
 	private Long userId;
+
 	/**
 	 * 昵称 SysUser.name
 	 */
@@ -31,19 +30,85 @@ public class SysUserDTO {
 	 */
 	private String newPassword;
 	/**
-	 * 用户名 SysAccount.openCode
+	 * 登录账号类型
+	 */
+	private Integer category;
+	/**
+	 * 用户名
 	 */
 	private String username;
 	/**
-	 * 账户类型 SysAccount.category
+	 * 手机号
 	 */
-	private Integer category;
+	private String phone;
+	/**
+	 * 邮箱
+	 */
+	private String email;
+	/**
+	 * 身份证
+	 */
+	private String idcard;
+	/**
+	 * 微信
+	 */
+	private String wechat;
 
 	private Long deptId;
+
+	private String deptName;
 
 	private Boolean deleted;
 
 	private Long[] roleIds;
+
+	public Integer getCategory() {
+		return category;
+	}
+
+	public void setCategory(Integer category) {
+		this.category = category;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public String getIdcard() {
+		return idcard;
+	}
+
+	public String getWechat() {
+		return wechat;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setIdcard(String idcard) {
+		this.idcard = idcard;
+	}
+
+	public void setWechat(String wechat) {
+		this.wechat = wechat;
+	}
+
+	public String getDeptName() {
+		return deptName;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
 
 	public Long[] getRoleIds() {
 		return roleIds;
@@ -67,11 +132,7 @@ public class SysUserDTO {
 	public SysUserDTO(SysUser user) {
 		this.userId = user.getId();
 		this.nickname = user.getName();
-		if (StringUtils.isNotNull(user.getAccount())) {
-			this.username = user.getAccount().getOpenCode();
-			this.category = user.getAccount().getCategory();
-			this.deleted = user.getAccount().getDeleted();
-		}
+
 	}
 
 	public Boolean getDeleted() {
@@ -106,11 +167,6 @@ public class SysUserDTO {
 		return username;
 	}
 
-	@NotNull(message = "账户类型不能为空")
-	public Integer getCategory() {
-		return category;
-	}
-
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
@@ -129,10 +185,6 @@ public class SysUserDTO {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public void setCategory(Integer category) {
-		this.category = category;
 	}
 
 }

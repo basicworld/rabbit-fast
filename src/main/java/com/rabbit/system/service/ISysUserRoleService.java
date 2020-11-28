@@ -14,4 +14,6 @@ public interface ISysUserRoleService extends BaseService<SysUserRole> {
 	Integer deleteByUserId(Long userId);
 
 	Integer updateByUser(SysUser user);
+
+	Integer insertByUser(SysUser user);
 }

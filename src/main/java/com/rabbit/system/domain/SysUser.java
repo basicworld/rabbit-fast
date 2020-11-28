@@ -1,8 +1,7 @@
 package com.rabbit.system.domain;
 
 import java.util.Date;
-
-import com.rabbit.system.domain.dto.SysUserDTO;
+import java.util.List;
 
 public class SysUser {
 	private Long id;
@@ -22,12 +21,26 @@ public class SysUser {
 	private String updateBy;
 
 	private Boolean deleted;
-
+	/**
+	 * 当前登录、编辑账号
+	 */
 	private SysAccount account;
+	/**
+	 * 用户所有账号
+	 */
+	private List<SysAccount> allAccounts;
 
 	private Long[] roleIds;
 
 	private Long deptId;
+
+	public List<SysAccount> getAllAccounts() {
+		return allAccounts;
+	}
+
+	public void setAllAccounts(List<SysAccount> allAccounts) {
+		this.allAccounts = allAccounts;
+	}
 
 	public Long getDeptId() {
 		return deptId;
@@ -47,14 +60,6 @@ public class SysUser {
 
 	public SysUser() {
 		super();
-	}
-
-	public SysUser(SysUserDTO userDTO) {
-		this.id = userDTO.getUserId();
-		this.name = userDTO.getNickname();
-		this.password = userDTO.getPassword();
-		this.deleted = userDTO.getDeleted();
-		this.account = new SysAccount(userDTO);
 	}
 
 	public SysAccount getAccount() {

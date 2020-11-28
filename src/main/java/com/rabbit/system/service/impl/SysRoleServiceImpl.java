@@ -55,7 +55,22 @@ public class SysRoleServiceImpl implements ISysRoleService {
 	}
 
 	@Override
+	@Transactional
+	public Integer deleteByPrimaryKey(Long[] roleIds) {
+		Integer count = 0;
+		for (Long roleId : roleIds) {
+			roleMenuService.deleteByRoleId(roleId);
+			count += roleMapper.deleteByPrimaryKey(roleId);
+		}
+		return count;
+	}
+
+	@Override
+	@Transactional
 	public Integer updateSelective(SysRole item) {
+		if (StringUtils.isNotNull(item)) {
+			roleMenuService.updateByRole(item);
+		}
 		item.setUpdateTime(new Date());
 		return roleMapper.updateByPrimaryKeySelective(item);
 	}
@@ -86,7 +101,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
 		if (StringUtils.isNull(role) || StringUtils.isNull(role.getId())) {
 			return ValidResult.error("缺少关键参数：role 或 role.id为空");
 		}
-		if (RoleConstants.ADMIN_ROLE_ID == role.getId()) {
+		if (RoleConstants.ADMIN_ROLE_ID.equals(role.getId())) {
 			return ValidResult.error("不允许修改超级管理员配置");
 		}
 		// 重复code或name判断
@@ -111,6 +126,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
 	public ValidResult validCheckBeforeDelete(Long roleId) {
 		if (StringUtils.isNull(roleId)) {
 			return ValidResult.error("角色ID为空");
+		}
+		if (RoleConstants.ADMIN_ROLE_ID.equals(roleId)) {
+			return ValidResult.error("不允许删除超级管理员");
 		}
 		SysRole role = selectByPrimaryKey(roleId);
 		if (StringUtils.isNull(role) || true == role.getDeleted()) {

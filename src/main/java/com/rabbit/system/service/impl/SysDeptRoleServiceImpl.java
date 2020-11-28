@@ -129,4 +129,11 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 		return count;
 	}
 
+	@Override
+	public Integer deleteByDeptId(Long deptId) {
+		SysDeptRoleExample example = new SysDeptRoleExample();
+		example.createCriteria().andIdGreaterThan(new Long(0)).andDeptIdEqualTo(deptId);
+		return deptRoleMapper.deleteByExample(example);
+	}
+
 }

@@ -29,6 +29,20 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
 	}
 
 	@Override
+	public Integer insertByUser(SysUser user) {
+		Long userId = user.getId();
+		Integer count = 0;
+		for (Long roleId : user.getRoleIds()) {
+			SysUserRole item = new SysUserRole();
+			item.setUserId(userId);
+			item.setRoleId(roleId);
+			insertSelective(item);
+		}
+
+		return count;
+	}
+
+	@Override
 	public Integer deleteByPrimaryKey(Long id) {
 		// TODO Auto-generated method stub
 		return userRoleMapper.deleteByPrimaryKey(id);

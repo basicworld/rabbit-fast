@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.sql.SqlUtil;
@@ -13,14 +14,19 @@ import com.rabbit.common.util.valid.ValidUtils;
 import com.rabbit.system.constant.AccountConstants;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysAccountExample;
+import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
 import com.rabbit.system.mapper.SysAccountMapper;
 import com.rabbit.system.service.ISysAccountService;
+import com.rabbit.system.service.ISysUserService;
 
 @Service
 public class SysAccountServiceImpl implements ISysAccountService {
 	@Autowired
 	SysAccountMapper accountMapper;
+
+	@Autowired
+	ISysUserService userService;
 
 	@Override
 	public Integer insertSelective(SysAccount item) {
@@ -32,8 +38,27 @@ public class SysAccountServiceImpl implements ISysAccountService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-
 		return accountMapper.deleteByPrimaryKey(id);
+	}
+
+	@Override
+	@Transactional
+	public Integer deleteByPrimaryKey(Long[] accountIds) {
+		Integer count = 0;
+		for (Long accountId : accountIds) {
+			// 待删除账号信息
+			SysAccount account = selectByPrimaryKey(accountId);
+			Long userId = account.getUserId();
+			// 删除账号
+			count += accountMapper.deleteByPrimaryKey(accountId);
+			// 如果该用户没有账号了，则逻辑删除用户
+			List<SysAccount> accountListOfUser = listByUserId(userId);
+			if (StringUtils.isEmpty(accountListOfUser)) {
+				userService.deleteByPrimaryKeyLogically(userId);
+			}
+
+		}
+		return count;
 	}
 
 	@Override
@@ -113,7 +138,7 @@ public class SysAccountServiceImpl implements ISysAccountService {
 		}
 		List<SysAccount> duplicateAccountList = listByCategoryAndOpenCode(account);
 		if (duplicateAccountList.size() > 0) {
-			return ValidResult.error("账号重复");
+			return ValidResult.error("账号重复:" + account.getOpenCode());
 		}
 		return ValidResult.success();
 
@@ -124,6 +149,16 @@ public class SysAccountServiceImpl implements ISysAccountService {
 		ValidResult preValid = validCheckBeforeInsertOrUpdate(account);
 		if (preValid.hasError()) {
 			return preValid;
+		}
+		if (StringUtils.isNotNull(account.getUserId()) && StringUtils.isNotNull(account.getCategory())
+				&& StringUtils.isNotNull(account.getOpenCode())) {
+			SysAccountExample example = new SysAccountExample();
+			example.createCriteria().andUserIdNotEqualTo(account.getUserId()).andCategoryEqualTo(account.getCategory())
+					.andOpenCodeEqualTo(account.getOpenCode());
+			List<SysAccount> duplicateAccountList = accountMapper.selectByExample(example);
+			if (duplicateAccountList.size() > 0) {
+				return ValidResult.error("账号重复:" + account.getOpenCode());
+			}
 		}
 		return ValidResult.success();
 	}
@@ -139,8 +174,8 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	@Override
 	public ValidResult validCheckBeforeInsertOrUpdate(SysAccount account) {
 		if (StringUtils.isNull(account) || StringUtils.isNull(account.getCategory())
-				|| StringUtils.isNull(account.getOpenCode()) || StringUtils.isNull(account.getUserId())) {
-			return ValidResult.error("账号、账号类型或用户ID为空");
+				|| StringUtils.isNull(account.getOpenCode())) {
+			return ValidResult.error("账号、账号类型不能为空");
 		}
 		if (!AccountConstants.VALID_CATEGORY_SET.contains(account.getCategory())) {
 			return ValidResult.error("账号类型不存在");
@@ -177,32 +212,20 @@ public class SysAccountServiceImpl implements ISysAccountService {
 				return ValidResult.error("微信号格式不符合要求");
 			}
 		}
-		List<SysAccount> accountList = listByCategoryAndUserId(account);
-		if (accountList.size() > 1) {
-			return ValidResult.error("同一类型的账号数大于1，严重异常！用户ID：" + account.getUserId());
-		}
+
 		return ValidResult.success();
 	}
 
 	@Override
-	public Integer insertOrUpdateSelective(SysAccount account) {
-		List<SysAccount> accountList = listByCategoryAndUserId(account);
-		if (accountList.size() == 0) {
-			return insertSelective(account);
+	public Integer updateByUser(SysUser user) {
+		List<SysAccount> allAccounts = user.getAllAccounts();
+		Long userId = user.getId();
+		Integer count = 0;
+		deleteByUserId(userId);
+		for (SysAccount account : allAccounts) {
+			count += insertSelective(account);
 		}
-		if (accountList.size() == 1) {
-			SysAccount existAccount = accountList.get(0);
-			if (existAccount.getOpenCode().equals(account.getOpenCode())) {
-				return 0; // 无需更新
-			} else {
-				existAccount.setOpenCode(account.getOpenCode());
-				return updateSelective(existAccount);
-			}
-		}
-		if (accountList.size() > 1) {
-			throw new RuntimeException("同一类型的账号数大于1，严重异常！用户ID：" + account.getUserId());
-		}
-		return 0;
+		return count;
 	}
 
 }

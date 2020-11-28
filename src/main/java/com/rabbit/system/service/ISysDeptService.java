@@ -33,7 +33,7 @@ public interface ISysDeptService extends BaseService<SysDept>, ValidCheckService
 	List<SysDept> listByDept(SysDept dept);
 
 	/**
-	 * 构建前段所需的树结构
+	 * 构建前端所需的树结构
 	 * 
 	 * @param deptList
 	 * @return 机构树
@@ -41,7 +41,7 @@ public interface ISysDeptService extends BaseService<SysDept>, ValidCheckService
 	List<SysDept> buildDeptTree(List<SysDept> deptList);
 
 	/**
-	 * 构建前段所需的下拉树结构
+	 * 构建前端所需的下拉树结构
 	 * 
 	 * @param deptList
 	 * @return 下拉树

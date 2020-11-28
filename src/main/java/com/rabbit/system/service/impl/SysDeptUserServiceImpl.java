@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rabbit.common.util.BaseUtils;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptUser;
 import com.rabbit.system.domain.SysDeptUserExample;
@@ -120,6 +121,13 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 	public Integer updateByUser(SysUser user) {
 		deleteByUserId(user.getId());
 		return insertByUser(user);
+	}
+
+	@Override
+	public SysDeptUser selectByUserId(Long userId) {
+		SysDeptUserExample example = new SysDeptUserExample();
+		example.createCriteria().andUserIdEqualTo(userId);
+		return BaseUtils.firstItemOfList(deptUserMapper.selectByExample(example));
 	}
 
 }

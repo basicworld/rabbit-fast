@@ -2,8 +2,6 @@ package com.rabbit.system.domain;
 
 import java.util.Date;
 
-import com.rabbit.system.domain.dto.SysUserDTO;
-
 public class SysAccount {
 	private Long id;
 
@@ -25,13 +23,6 @@ public class SysAccount {
 
 	public SysAccount() {
 		super();
-	}
-
-	public SysAccount(SysUserDTO userDTO) {
-		this.userId = userDTO.getUserId();
-		this.openCode = userDTO.getUsername();
-		this.category = userDTO.getCategory();
-		this.deleted = userDTO.getDeleted();
 	}
 
 	public Long getId() {

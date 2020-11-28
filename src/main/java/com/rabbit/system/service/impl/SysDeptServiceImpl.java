@@ -53,7 +53,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
+		deptRoleService.deleteByDeptId(id);
 		return deptMapper.deleteByPrimaryKey(id);
 	}
 
