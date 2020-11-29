@@ -91,8 +91,6 @@ public class SysUserController extends BaseController {
 		// 初始化密码设置
 		String salt = SecurityUtils.genSalt();
 		String encodePassword = BCryptUtils.encode(DEFAULT_RAW_PASSWORD + salt);
-		userDTO.setPassword(encodePassword);
-
 		SysUser user = userService.dto2User(userDTO);
 		user.setSalt(salt);
 		user.setPassword(encodePassword);
@@ -102,7 +100,7 @@ public class SysUserController extends BaseController {
 			return AjaxResult.error(checkResult.getMessage());
 		}
 		userService.insertSelective(user);
-		return AjaxResult.success();
+		return AjaxResult.success("创建成功，默认密码：" + DEFAULT_RAW_PASSWORD);
 	}
 
 	/**
@@ -156,6 +154,33 @@ public class SysUserController extends BaseController {
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysUserDTO userDTO) {
 		SysUser user = userService.dto2User(userDTO);
+		ValidResult checkResult = userService.validCheckBeforeUpdate(user);
+		if (checkResult.hasError()) {
+			return AjaxResult.error(checkResult.getMessage());
+		}
+		userService.updateSelective(user);
+		return AjaxResult.success();
+	}
+
+	/**
+	 * 重置密码
+	 * 
+	 * @param userDTO
+	 * @return
+	 */
+	@PutMapping("/resetPassword")
+	public AjaxResult resetPassword(@RequestBody SysUserDTO userDTO) {
+		if (StringUtils.isNull(userDTO.getUserId()) || StringUtils.isNull(userDTO.getPassword())) {
+			return AjaxResult.error("用户ID或密码为空");
+		}
+		SysUser user = new SysUser();
+		user.setId(userDTO.getUserId());
+		// 密码设置
+		String salt = SecurityUtils.genSalt();
+		String encodePassword = BCryptUtils.encode(userDTO.getPassword() + salt);
+		user.setSalt(salt);
+		user.setPassword(encodePassword);
+
 		ValidResult checkResult = userService.validCheckBeforeUpdate(user);
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());
