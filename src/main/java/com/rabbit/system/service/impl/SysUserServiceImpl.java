@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,8 @@ import com.rabbit.system.service.ISysUserService;
 
 @Service
 public class SysUserServiceImpl implements ISysUserService {
+	protected final Logger logger = LoggerFactory.getLogger(SysUserServiceImpl.class);
+
 	@Autowired
 	SysUserMapper userMapper;
 
@@ -106,6 +110,7 @@ public class SysUserServiceImpl implements ISysUserService {
 		}
 		// 部门关联
 		if (StringUtils.isNotNull(item.getDeptId())) {
+			logger.debug("更新用户--部门关联，新部门：" + item.getDeptId());
 			deptUserService.updateByUser(item);
 		}
 		// 角色更新
@@ -297,7 +302,7 @@ public class SysUserServiceImpl implements ISysUserService {
 			Long deptId = deptUser.getDeptId();
 			dto.setDeptId(deptId);
 			SysDept dept = deptService.selectByPrimaryKey(deptId);
-			dto.setDeptName(StringUtils.isNotNull(dept) ? dept.getName() : "");
+			dto.setDeptName(StringUtils.isNotNull(dept) ? dept.getFullname() : "");
 		}
 		// 补全账号信息
 		List<SysAccount> allAccounts = user.getAllAccounts();

@@ -153,11 +153,13 @@ public class SysUserController extends BaseController {
 	 */
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysUserDTO userDTO) {
+		logger.debug("收到更新用户请求");
 		SysUser user = userService.dto2User(userDTO);
 		ValidResult checkResult = userService.validCheckBeforeUpdate(user);
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());
 		}
+		logger.debug("更新用户信息：" + user);
 		userService.updateSelective(user);
 		return AjaxResult.success();
 	}

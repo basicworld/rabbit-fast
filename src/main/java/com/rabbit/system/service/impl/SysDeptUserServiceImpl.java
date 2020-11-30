@@ -60,7 +60,7 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 	public Integer deleteByUserId(Long userId) {
 		SysDeptUserExample example = new SysDeptUserExample();
 		example.createCriteria().andIdGreaterThan(new Long(0)).andUserIdEqualTo(userId);
-		return null;
+		return deptUserMapper.deleteByExample(example);
 	}
 
 	@Override
