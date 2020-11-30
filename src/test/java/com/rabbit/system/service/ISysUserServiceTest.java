@@ -1,5 +1,7 @@
 package com.rabbit.system.service;
 
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.rabbit.Application;
+import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 
 import junit.framework.TestCase;
@@ -26,6 +29,7 @@ public class ISysUserServiceTest {
 		item.setName("name");
 		item.setSalt("salt");
 		item.setPassword("password");
+		item.setAllAccounts(new ArrayList<SysAccount>());
 		userService.insertSelective(item);
 
 		this.user = item;

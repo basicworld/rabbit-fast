@@ -25,6 +25,7 @@ public class ISysRoleServiceTest {
 		SysRole item = new SysRole();
 		item.setName("name");
 		item.setCode("code");
+		item.setMenuIds(new Long[0]);
 		roleService.insertSelective(item);
 
 		this.role = item;
