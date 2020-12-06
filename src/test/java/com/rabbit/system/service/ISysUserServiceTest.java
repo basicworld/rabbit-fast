@@ -7,18 +7,34 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.rabbit.Application;
+import com.rabbit.common.util.RSAUtils;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
+import com.rabbit.system.domain.dto.SysUserDTO;
 
 import junit.framework.TestCase;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class ISysUserServiceTest {
+	/**
+	 * 默认明文密码
+	 */
+	@Value("${user.defaultPassword}")
+	private String DEFAULT_RAW_PASSWORD;
+
+	@Value("${rsa.publicKey}")
+	private String rsaPublicKey;
+
+	@Value("${rsa.privateKey}")
+	private String rsaPrivateKey;
+
 	@Autowired
 	ISysUserService userService;
 	private SysUser user;
@@ -40,6 +56,31 @@ public class ISysUserServiceTest {
 		if (null != this.user && null != this.user.getId()) {
 			userService.deleteByPrimaryKey(this.user.getId());
 		}
+	}
+
+	@Test
+	public void rsatest() {
+		String rawPassword = "Abcd1234";
+		String encodePassword = RSAUtils.encrypt(rsaPublicKey, rawPassword);
+
+		String decodePassword = RSAUtils.decrypt(rsaPrivateKey, encodePassword);
+		System.out.println("rawPassword=" + rawPassword);
+		System.out.println("encodePassword=" + encodePassword);
+		TestCase.assertEquals(rawPassword, decodePassword);
+	}
+
+	@Test
+	public void createUser() {
+		SysUserDTO userDTO = new SysUserDTO();
+		userDTO.setUsername("admin");
+
+		// 初始化密码设置
+		// 进行加密
+        BCryptPasswordEncoder encoder =new BCryptPasswordEncoder();
+		String encodePassword = encoder.encode(DEFAULT_RAW_PASSWORD);
+		SysUser user = userService.dto2User(userDTO);
+		user.setPassword(encodePassword);
+		System.out.println("encodePassword=" + encodePassword);
 	}
 
 	@Test

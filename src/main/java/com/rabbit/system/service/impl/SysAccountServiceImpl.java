@@ -144,6 +144,9 @@ public class SysAccountServiceImpl implements ISysAccountService {
 
 	}
 
+	/**
+	 * 符合各类型账号的基本格式，不允许有账号重复
+	 */
 	@Override
 	public ValidResult validCheckBeforeUpdate(SysAccount account) {
 		ValidResult preValid = validCheckBeforeInsertOrUpdate(account);

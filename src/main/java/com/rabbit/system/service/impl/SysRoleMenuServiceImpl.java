@@ -1,5 +1,6 @@
 package com.rabbit.system.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rabbit.common.util.StringUtils;
 import com.rabbit.system.domain.SysRole;
 import com.rabbit.system.domain.SysRoleMenu;
 import com.rabbit.system.domain.SysRoleMenuExample;
@@ -51,6 +53,23 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 		SysRoleMenuExample example = new SysRoleMenuExample();
 		example.createCriteria().andRoleIdEqualTo(roleId);
 		return roleMenuMapper.selectByExample(example);
+	}
+
+	@Override
+	public List<SysRoleMenu> listByRoleId(Long[] roleIds) {
+		if (StringUtils.isEmpty(roleIds)) {
+			return new ArrayList<SysRoleMenu>();
+		}
+		// 返回值
+		List<SysRoleMenu> roleMenus = new ArrayList<SysRoleMenu>();
+
+		Set<Long> uniqueRoleIds = Stream.of(roleIds).collect(Collectors.toSet());
+		for (Long roleId : uniqueRoleIds) {
+			List<SysRoleMenu> items = listByRoleId(roleId);
+			roleMenus.addAll(items);
+		}
+
+		return roleMenus;
 	}
 
 	@Override

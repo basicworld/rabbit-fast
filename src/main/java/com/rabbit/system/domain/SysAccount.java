@@ -1,8 +1,14 @@
 package com.rabbit.system.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class SysAccount {
+public class SysAccount implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private Long id;
 
 	private Long userId;

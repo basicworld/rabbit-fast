@@ -48,4 +48,36 @@ public interface ISysMenuService extends BaseService<SysMenu> {
 	 */
 	List<SysRouter> menu2Router(List<SysMenu> menuList);
 
+	/**
+	 * 根据主键批量获取
+	 * 
+	 * @param menuIds
+	 * @return
+	 */
+	List<SysMenu> listByPrimaryKeys(Long[] menuIds);
+
+	/**
+	 * 根据用户ID查询菜单
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	List<SysMenu> listByUserId(Long userId);
+
+	/**
+	 * 根据角色主键查询
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	List<SysMenu> listByRoleId(Long roleId);
+
+	/**
+	 * 根据角色主键查询
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	List<SysMenu> listByRoleId(Long[] roleIds);
+
 }

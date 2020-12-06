@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 import com.google.code.kaptcha.Producer;
 import com.rabbit.common.constant.BaseConstants;
+import com.rabbit.common.core.text.StrFormatter;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.framework.redis.RedisCache;
 import com.rabbit.system.domain.Captcha;
@@ -22,6 +25,7 @@ import com.rabbit.system.service.ICaptchaService;
 
 @Service
 public class CaptchaServiceImpl implements ICaptchaService {
+	public static Log logger = LogFactory.getLog(CaptchaServiceImpl.class);
 	@Resource(name = "captchaProducer")
 	private Producer captchaProducer;
 
@@ -60,11 +64,16 @@ public class CaptchaServiceImpl implements ICaptchaService {
 		String redisKey = genCaptchaRedisKey(uuid);
 
 		redisCache.setCacheObject(redisKey, code, BaseConstants.CAPTCHA_EXPIRATION, TimeUnit.MINUTES);
+		String logStr = StrFormatter.format("write captcha to redis, key={}, code={}", redisKey, code);
+		logger.debug(logStr);
 		return cap;
 	}
 
 	@Override
 	public Boolean validate(Captcha item) {
+		if (StringUtils.isNull(item) || StringUtils.isNull(item.getCode()) || StringUtils.isNull(item.getUuid())) {
+			return false;
+		}
 		String redisKey = genCaptchaRedisKey(item);
 		String code = redisCache.getCacheObject(redisKey);
 		return (StringUtils.isNotNull(code) && code.equals(item.getCode()));

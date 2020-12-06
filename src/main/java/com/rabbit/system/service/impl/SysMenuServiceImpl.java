@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,11 +21,20 @@ import com.rabbit.system.domain.dto.SysRouter;
 import com.rabbit.system.domain.dto.SysRouterMeta;
 import com.rabbit.system.mapper.SysMenuMapper;
 import com.rabbit.system.service.ISysMenuService;
+import com.rabbit.system.service.ISysRoleMenuService;
+import com.rabbit.system.service.ISysRoleService;
+import com.rabbit.system.service.ISysUserService;
 
 @Service
 public class SysMenuServiceImpl implements ISysMenuService {
 	@Autowired
 	SysMenuMapper menuMapper;
+	@Autowired
+	ISysRoleMenuService roleMenuService;
+	@Autowired
+	ISysRoleService roleService;
+	@Autowired
+	ISysUserService userService;
 
 	@Override
 	public Integer insertSelective(SysMenu item) {
@@ -108,6 +119,62 @@ public class SysMenuServiceImpl implements ISysMenuService {
 			routerList.add(menu2Router(menu));
 		}
 		return routerList;
+	}
+
+	@Override
+	public List<SysMenu> listByPrimaryKeys(Long[] menuIds) {
+		if (StringUtils.isEmpty(menuIds)) {
+			return new ArrayList<SysMenu>();
+		}
+		Set<Long> uniqueMenuIds = Stream.of(menuIds).collect(Collectors.toSet());
+		List<SysMenu> menus = new ArrayList<SysMenu>();
+		for (Long menuId : uniqueMenuIds) {
+			SysMenu menu = selectByPrimaryKey(menuId);
+			if (StringUtils.isNotNull(menu)) {
+				menus.add(menu);
+			}
+		}
+		return menus;
+	}
+
+	@Override
+	public List<SysMenu> listByRoleId(Long roleId) {
+		Set<Long> menuIds = roleMenuService.listByRoleId(roleId).stream().map(v -> v.getMenuId())
+				.collect(Collectors.toSet());
+		List<SysMenu> menus = new ArrayList<SysMenu>();
+		for (Long menuId : menuIds) {
+			SysMenu menu = selectByPrimaryKey(menuId);
+			if (StringUtils.isNotNull(menu)) {
+				menus.add(menu);
+			}
+		}
+		return menus;
+	}
+
+	@Override
+	public List<SysMenu> listByRoleId(Long[] roleIds) {
+		Set<Long> menuIds = roleMenuService.listByRoleId(roleIds).stream().map(v -> v.getMenuId())
+				.collect(Collectors.toSet());
+		List<SysMenu> menus = new ArrayList<SysMenu>();
+		for (Long menuId : menuIds) {
+			SysMenu menu = selectByPrimaryKey(menuId);
+			if (StringUtils.isNotNull(menu)) {
+				menus.add(menu);
+			}
+		}
+		return menus;
+	}
+
+	@Override
+	public List<SysMenu> listByUserId(Long userId) {
+		// 如果是超级管理员，则返回所有菜单
+		if (userService.isAdmin(userId)) {
+			return listByMenu(new SysMenu());
+		}
+		// 非超级管理员，按角色返回菜单
+		Set<Long> roleIdSet = roleService.listByUserId(userId).stream().map(v -> v.getId()).collect(Collectors.toSet());
+		Long[] roleIds = roleIdSet.stream().toArray(Long[]::new);
+		return listByRoleId(roleIds);
 	}
 
 }

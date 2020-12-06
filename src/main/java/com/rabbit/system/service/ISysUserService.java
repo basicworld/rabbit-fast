@@ -66,6 +66,22 @@ public interface ISysUserService extends BaseService<SysUser>, ValidCheckService
 	 */
 	List<SysUser> listByUserDTO(SysUserDTO userDTO);
 
+	/**
+	 * 根据主键批量删除用户
+	 * 
+	 * @param userIds
+	 * @return
+	 */
 	Integer deleteByPrimaryKey(Long[] userIds);
+
+	/**
+	 * 判断是否是超级管理员
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	Boolean isAdmin(Long userId);
+
+	Boolean isNotAdmin(Long userId);
 
 }

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
-import com.rabbit.common.util.BCryptUtils;
 import com.rabbit.common.util.SecurityUtils;
+import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.security.domain.LoginUser;
+import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
@@ -48,6 +51,8 @@ public class SysUserController extends BaseController {
 	ISysDeptUserService deptUserService;
 	@Autowired
 	ISysUserRoleService userRoleService;
+	@Autowired
+	TokenService tokenService;
 	/**
 	 * 默认明文密码
 	 */
@@ -88,9 +93,11 @@ public class SysUserController extends BaseController {
 	public AjaxResult add(@Validated @RequestBody SysUserDTO userDTO) {
 		// 删除状态设置
 		userDTO.setDeleted(false);
+		// 进行加密
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		String encodePassword = encoder.encode(DEFAULT_RAW_PASSWORD);
 		// 初始化密码设置
-		String salt = SecurityUtils.genSalt();
-		String encodePassword = BCryptUtils.encode(DEFAULT_RAW_PASSWORD + salt);
+		String salt = SecurityUtils.genSalt(); // 字段弃用
 		SysUser user = userService.dto2User(userDTO);
 		user.setSalt(salt);
 		user.setPassword(encodePassword);
@@ -135,10 +142,23 @@ public class SysUserController extends BaseController {
 	 */
 	@DeleteMapping("/{userIds}")
 	public AjaxResult delete(@PathVariable Long[] userIds) {
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
+
 		for (Long userId : userIds) {
 			ValidResult checkResult = userService.validCheckBeforeDelete(userId);
 			if (checkResult.hasError()) {
 				return AjaxResult.error(checkResult.getMessage());
+			}
+
+			boolean thisUserAdmin = userService.isAdmin(userId);
+			// 非超级管理员不能修改超级管理员信息
+			if (loginUserNotAdmin && thisUserAdmin) {
+				return AjaxResult.error("非超级管理员不能删除超级管理员");
+			}
+
+			if (loginUser.getUser().getId().equals(userId)) {
+				return AjaxResult.error("不允许删除登录用户账号");
 			}
 		}
 		userService.deleteByPrimaryKeyLogically(userIds);
@@ -153,7 +173,22 @@ public class SysUserController extends BaseController {
 	 */
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysUserDTO userDTO) {
-		logger.debug("收到更新用户请求");
+		logger.debug("更新用户，ID=" + userDTO.getUserId());
+		// 不更新密码
+		userDTO.setNewPassword(null);
+		userDTO.setPassword(null);
+
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		// 非超级管理员不能修改超级管理员信息
+		if (userService.isNotAdmin(loginUser.getUser().getId())) {
+			if (userService.isAdmin(userDTO.getUserId())) {
+				return AjaxResult.error("非超级管理员不能修改超级管理员信息");
+			}
+		}
+
+		if (loginUser.getUser().getId().equals(userDTO.getUserId())) {
+			return AjaxResult.error("不允许修改登录用户信息");
+		}
 		SysUser user = userService.dto2User(userDTO);
 		ValidResult checkResult = userService.validCheckBeforeUpdate(user);
 		if (checkResult.hasError()) {
@@ -175,11 +210,21 @@ public class SysUserController extends BaseController {
 		if (StringUtils.isNull(userDTO.getUserId()) || StringUtils.isNull(userDTO.getPassword())) {
 			return AjaxResult.error("用户ID或密码为空");
 		}
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		// 非超级管理员不能修改超级管理员信息
+		if (userService.isNotAdmin(loginUser.getUser().getId())) {
+			if (userService.isAdmin(userDTO.getUserId())) {
+				return AjaxResult.error("非超级管理员不能修改超级管理员信息");
+			}
+		}
+
 		SysUser user = new SysUser();
 		user.setId(userDTO.getUserId());
 		// 密码设置
 		String salt = SecurityUtils.genSalt();
-		String encodePassword = BCryptUtils.encode(userDTO.getPassword() + salt);
+		// 进行加密
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		String encodePassword = encoder.encode(userDTO.getPassword());
 		user.setSalt(salt);
 		user.setPassword(encodePassword);
 

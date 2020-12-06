@@ -1,9 +1,13 @@
 package com.rabbit.system.domain;
 
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class SysUser {
+public class SysUser implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private Long id;
 
 	private String name;
@@ -29,9 +33,13 @@ public class SysUser {
 	 * 用户所有账号
 	 */
 	private List<SysAccount> allAccounts;
-
+	/**
+	 * 角色ID
+	 */
 	private Long[] roleIds;
-
+	/**
+	 * 部门ID
+	 */
 	private Long deptId;
 
 	public List<SysAccount> getAllAccounts() {
@@ -141,4 +149,12 @@ public class SysUser {
 	public void setDeleted(Boolean deleted) {
 		this.deleted = deleted;
 	}
+
+	@Override
+	public String toString() {
+		return "SysUser [id=" + id + ", name=" + name + ", salt=" + salt + ", password=" + password + ", deleted="
+				+ deleted + ", account=" + account + ", allAccounts=" + allAccounts + ", roleIds="
+				+ Arrays.toString(roleIds) + ", deptId=" + deptId + "]";
+	}
+
 }

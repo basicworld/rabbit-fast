@@ -9,6 +9,8 @@ import com.rabbit.system.domain.SysRoleMenu;
 public interface ISysRoleMenuService extends BaseService<SysRoleMenu> {
 	List<SysRoleMenu> listByRoleId(Long roleId);
 
+	List<SysRoleMenu> listByRoleId(Long[] roleIds);
+
 	List<SysRoleMenu> listByMenuId(Long menuId);
 
 	/**
@@ -34,4 +36,5 @@ public interface ISysRoleMenuService extends BaseService<SysRoleMenu> {
 	 * @return
 	 */
 	Integer insertByRole(SysRole role);
+
 }

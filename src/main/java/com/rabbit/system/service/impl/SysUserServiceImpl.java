@@ -3,6 +3,7 @@ package com.rabbit.system.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.sql.SqlUtil;
 import com.rabbit.common.util.valid.ValidResult;
 import com.rabbit.system.constant.AccountConstants;
+import com.rabbit.system.constant.RoleConstants;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptUser;
@@ -24,6 +26,7 @@ import com.rabbit.system.mapper.SysUserMapper;
 import com.rabbit.system.service.ISysAccountService;
 import com.rabbit.system.service.ISysDeptService;
 import com.rabbit.system.service.ISysDeptUserService;
+import com.rabbit.system.service.ISysRoleService;
 import com.rabbit.system.service.ISysUserRoleService;
 import com.rabbit.system.service.ISysUserService;
 
@@ -45,6 +48,9 @@ public class SysUserServiceImpl implements ISysUserService {
 
 	@Autowired
 	ISysDeptService deptService;
+
+	@Autowired
+	ISysRoleService roleService;
 
 	@Override
 	@Transactional
@@ -105,16 +111,19 @@ public class SysUserServiceImpl implements ISysUserService {
 	public Integer updateSelective(SysUser item) {
 		item.setUpdateTime(new Date());
 		// 账号更新
-		if (StringUtils.isNotNull(item.getAllAccounts())) {
+		// 只有非空时才更新，以保证最少一个登录账号可用
+		if (StringUtils.isNotEmpty(item.getAllAccounts())) {
 			accountService.updateByUser(item);
 		}
 		// 部门关联
+		// 只有非空时才更新，以保证用户从属于一个部门
 		if (StringUtils.isNotNull(item.getDeptId())) {
 			logger.debug("更新用户--部门关联，新部门：" + item.getDeptId());
 			deptUserService.updateByUser(item);
 		}
 		// 角色更新
-		if (StringUtils.isNotNull(item.getRoleIds())) {
+		// 只有非空时才更新，以保证至少拥有一个角色
+		if (StringUtils.isNotEmpty(item.getRoleIds())) {
 			userRoleService.updateByUser(item);
 		}
 		return userMapper.updateByPrimaryKeySelective(item);
@@ -165,6 +174,9 @@ public class SysUserServiceImpl implements ISysUserService {
 		return ValidResult.success();
 	}
 
+	/**
+	 * 用户不能为空，用户必须存在，符合账号校验规则
+	 */
 	@Override
 	public ValidResult validCheckBeforeUpdate(SysUser user) {
 		if (StringUtils.isNull(user) || StringUtils.isNull(user.getId())) {
@@ -337,6 +349,17 @@ public class SysUserServiceImpl implements ISysUserService {
 			c1.andNameLike(SqlUtil.getFuzzQueryParam(userDTO.getNickname()));
 		}
 		return userMapper.selectByExample(example);
+	}
+
+	@Override
+	public Boolean isAdmin(Long userId) {
+		return roleService.listByUserId(userId).stream().filter(v -> RoleConstants.ADMIN_ROLE_CODE.equals(v.getCode()))
+				.collect(Collectors.toList()).size() > 0;
+	}
+
+	@Override
+	public Boolean isNotAdmin(Long userId) {
+		return !isAdmin(userId);
 	}
 
 }

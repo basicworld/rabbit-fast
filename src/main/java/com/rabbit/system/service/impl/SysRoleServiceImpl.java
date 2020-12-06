@@ -1,9 +1,13 @@
 package com.rabbit.system.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +16,12 @@ import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.sql.SqlUtil;
 import com.rabbit.common.util.valid.ValidResult;
 import com.rabbit.system.constant.RoleConstants;
+import com.rabbit.system.domain.SysDeptUser;
 import com.rabbit.system.domain.SysRole;
 import com.rabbit.system.domain.SysRoleExample;
 import com.rabbit.system.mapper.SysRoleMapper;
 import com.rabbit.system.service.ISysDeptRoleService;
+import com.rabbit.system.service.ISysDeptUserService;
 import com.rabbit.system.service.ISysRoleMenuService;
 import com.rabbit.system.service.ISysRoleService;
 import com.rabbit.system.service.ISysUserRoleService;
@@ -27,6 +33,8 @@ public class SysRoleServiceImpl implements ISysRoleService {
 
 	@Autowired
 	ISysRoleMenuService roleMenuService;
+	@Autowired
+	ISysDeptUserService deptUserService;
 
 	@Autowired
 	ISysUserRoleService userRoleService;
@@ -141,12 +149,12 @@ public class SysRoleServiceImpl implements ISysRoleService {
 		// 关联用户判断
 		int userRoleCount = userRoleService.listByRoleId(roleId).size();
 		if (userRoleCount > 0) {
-			return ValidResult.error("存在关联的用户，不能删除");
+			return ValidResult.error("角色被用户使用中，不能删除");
 		}
 		// 关联用户组判断
 		int deptRoleCount = deptRoleService.listByRoleId(roleId).size();
 		if (deptRoleCount > 0) {
-			return ValidResult.error("存在关联的用户组，不能删除");
+			return ValidResult.error("角色被部门使用中，不能删除");
 		}
 		return ValidResult.success();
 	}
@@ -183,6 +191,42 @@ public class SysRoleServiceImpl implements ISysRoleService {
 			}
 		}
 		return roleMapper.selectByExample(example);
+	}
+
+	@Override
+	public List<SysRole> listByPrimaryKeys(Long[] roleIds) {
+		List<SysRole> roles = new ArrayList<SysRole>();
+		if (StringUtils.isEmpty(roleIds)) {
+			return roles;
+		}
+		Set<Long> uniqueRoleIds = Stream.of(roleIds).collect(Collectors.toSet());
+		for (Long roleId : uniqueRoleIds) {
+			SysRole role = selectByPrimaryKey(roleId);
+			if (StringUtils.isNotNull(role)) {
+				roles.add(role);
+			}
+		}
+		return roles;
+	}
+
+	@Override
+	public List<SysRole> listByUserId(Long userId) {
+		// 来自用户的角色ID
+		Long[] roleIds = userRoleService.listByUserId(userId).stream().map(v -> v.getRoleId()).toArray(Long[]::new);
+
+		// 来自所属部门的角色ID
+		Long[] roleIds2 = new Long[0];
+		// 获取部门关联
+		SysDeptUser deptUser = deptUserService.selectByUserId(userId);
+		if (StringUtils.isNotNull(deptUser)) {
+			roleIds2 = deptRoleService.listByDeptId(deptUser.getDeptId()).stream().map(v -> v.getRoleId())
+					.toArray(Long[]::new);
+		}
+
+		Long[] allRoleIds = (Long[]) ArrayUtils.addAll(roleIds, roleIds2);
+		List<SysRole> roles = listByPrimaryKeys(allRoleIds);
+
+		return roles;
 	}
 
 }

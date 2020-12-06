@@ -18,17 +18,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.security.domain.LoginUser;
+import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
 import com.rabbit.system.domain.SysMenu;
 import com.rabbit.system.domain.SysRole;
 import com.rabbit.system.domain.SysRoleMenu;
+import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.service.ISysMenuService;
 import com.rabbit.system.service.ISysRoleMenuService;
 import com.rabbit.system.service.ISysRoleService;
+import com.rabbit.system.service.ISysUserRoleService;
 
 @RestController
 @RequestMapping("/system/role")
@@ -43,6 +48,12 @@ public class SysRoleController extends BaseController {
 
 	@Autowired
 	ISysMenuService menuService;
+
+	@Autowired
+	ISysUserRoleService userRoleService;
+
+	@Autowired
+	TokenService tokenService;
 
 	/**
 	 * 新增
@@ -69,13 +80,13 @@ public class SysRoleController extends BaseController {
 	@DeleteMapping("/{roleIds}")
 	public AjaxResult delete(@PathVariable Long[] roleIds) {
 		logger.debug("执行删除：" + roleIds);
-		for(Long roleId: roleIds) {
+		for (Long roleId : roleIds) {
 			ValidResult result = roleService.validCheckBeforeDelete(roleId);
 			if (result.hasError()) {
 				return AjaxResult.error(result.getMessage());
 			}
 		}
-		
+
 		roleService.deleteByPrimaryKey(roleIds);
 		return AjaxResult.success();
 	}
@@ -127,6 +138,13 @@ public class SysRoleController extends BaseController {
 	 */
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysRole role) {
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		SysUser user = loginUser.getUser();
+		Set<Long> roleIdOfUser = roleService.listByUserId(user.getId()).stream().map(v -> v.getId())
+				.collect(Collectors.toSet());
+		if (roleIdOfUser.contains(role.getId())) {
+			return AjaxResult.error("不允许修改本人的关联权限");
+		}
 		ValidResult result = roleService.validCheckBeforeUpdate(role);
 		if (result.hasError()) {
 			return AjaxResult.error(result.getMessage());

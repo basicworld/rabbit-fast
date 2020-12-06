@@ -53,11 +53,17 @@ public class SysUserDTO {
 	 * 微信
 	 */
 	private String wechat;
-
+	/**
+	 * 部门ID
+	 */
 	private Long deptId;
-
+	/**
+	 * 部门名称
+	 */
 	private String deptName;
-
+	/**
+	 * 删除标记
+	 */
 	private Boolean deleted;
 
 	private Long[] roleIds;
