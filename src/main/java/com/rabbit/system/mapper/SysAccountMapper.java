@@ -5,24 +5,31 @@ import com.rabbit.system.domain.SysAccountExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
+/**
+ * 账号mapper
+ * 
+ * @author wlfei
+ *
+ */
 public interface SysAccountMapper {
-    int deleteByExample(SysAccountExample example);
 
-    int deleteByPrimaryKey(Long id);
+	int deleteByExample(SysAccountExample example);
 
-    int insert(SysAccount record);
+	int deleteByPrimaryKey(Long id);
 
-    int insertSelective(SysAccount record);
+	int insert(SysAccount record);
 
-    List<SysAccount> selectByExample(SysAccountExample example);
+	int insertSelective(SysAccount record);
 
-    SysAccount selectByPrimaryKey(Long id);
+	List<SysAccount> selectByExample(SysAccountExample example);
 
-    int updateByExampleSelective(@Param("record") SysAccount record, @Param("example") SysAccountExample example);
+	SysAccount selectByPrimaryKey(Long id);
 
-    int updateByExample(@Param("record") SysAccount record, @Param("example") SysAccountExample example);
+	int updateByExampleSelective(@Param("record") SysAccount record, @Param("example") SysAccountExample example);
 
-    int updateByPrimaryKeySelective(SysAccount record);
+	int updateByExample(@Param("record") SysAccount record, @Param("example") SysAccountExample example);
 
-    int updateByPrimaryKey(SysAccount record);
+	int updateByPrimaryKeySelective(SysAccount record);
+
+	int updateByPrimaryKey(SysAccount record);
 }

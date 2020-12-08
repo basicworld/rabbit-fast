@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.rabbit.system.domain.Captcha;
 
 /**
- * 验证码
+ * 验证码service
  * 
  * @author wlfei
  *
@@ -22,7 +22,7 @@ public interface ICaptchaService {
 	/**
 	 * 验证验证码是否正确
 	 * 
-	 * @param item
+	 * @param item {uuid:xxx, code:xxx}
 	 * @return
 	 */
 	Boolean validate(Captcha item);

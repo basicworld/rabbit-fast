@@ -5,24 +5,30 @@ import com.rabbit.system.domain.SysUserExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
+/**
+ * 用户mapper
+ * 
+ * @author wlfei
+ *
+ */
 public interface SysUserMapper {
-    int deleteByExample(SysUserExample example);
+	int deleteByExample(SysUserExample example);
 
-    int deleteByPrimaryKey(Long id);
+	int deleteByPrimaryKey(Long id);
 
-    int insert(SysUser record);
+	int insert(SysUser record);
 
-    int insertSelective(SysUser record);
+	int insertSelective(SysUser record);
 
-    List<SysUser> selectByExample(SysUserExample example);
+	List<SysUser> selectByExample(SysUserExample example);
 
-    SysUser selectByPrimaryKey(Long id);
+	SysUser selectByPrimaryKey(Long id);
 
-    int updateByExampleSelective(@Param("record") SysUser record, @Param("example") SysUserExample example);
+	int updateByExampleSelective(@Param("record") SysUser record, @Param("example") SysUserExample example);
 
-    int updateByExample(@Param("record") SysUser record, @Param("example") SysUserExample example);
+	int updateByExample(@Param("record") SysUser record, @Param("example") SysUserExample example);
 
-    int updateByPrimaryKeySelective(SysUser record);
+	int updateByPrimaryKeySelective(SysUser record);
 
-    int updateByPrimaryKey(SysUser record);
+	int updateByPrimaryKey(SysUser record);
 }

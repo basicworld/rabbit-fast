@@ -35,6 +35,12 @@ import com.rabbit.system.service.ISysRoleMenuService;
 import com.rabbit.system.service.ISysRoleService;
 import com.rabbit.system.service.ISysUserRoleService;
 
+/**
+ * 角色controller
+ * 
+ * @author wlfei
+ *
+ */
 @RestController
 @RequestMapping("/system/role")
 public class SysRoleController extends BaseController {
@@ -56,7 +62,7 @@ public class SysRoleController extends BaseController {
 	TokenService tokenService;
 
 	/**
-	 * 新增
+	 * 新增角色
 	 * 
 	 * @param role
 	 * @return
@@ -72,14 +78,15 @@ public class SysRoleController extends BaseController {
 	}
 
 	/**
-	 * 删除
+	 * 删除角色
 	 * 
-	 * @param roleId
+	 * @param roleIds 角色ID列表
 	 * @return
 	 */
 	@DeleteMapping("/{roleIds}")
 	public AjaxResult delete(@PathVariable Long[] roleIds) {
 		logger.debug("执行删除：" + roleIds);
+		// 校验每个角色是否可删除，如果存在不能删除的，则不删除任何角色
 		for (Long roleId : roleIds) {
 			ValidResult result = roleService.validCheckBeforeDelete(roleId);
 			if (result.hasError()) {
@@ -92,7 +99,7 @@ public class SysRoleController extends BaseController {
 	}
 
 	/**
-	 * 获取详情
+	 * 获取角色详情
 	 * 
 	 * @param roleId
 	 * @return
@@ -112,13 +119,13 @@ public class SysRoleController extends BaseController {
 		List<SysMenu> allMenus = menuService.listByMenu(new SysMenu());
 		Set<Long> allMenuParentIds = allMenus.stream().map(v -> v.getParentId()).collect(Collectors.toSet());
 		Long[] menuLeafNodeIds = Stream.of(menuIds).filter(v -> !allMenuParentIds.contains(v)).toArray(Long[]::new);
-
+		// 将叶子结点菜单ID返回给前端
 		role.setMenuIds(menuLeafNodeIds);
 		return AjaxResult.success(role);
 	}
 
 	/**
-	 * 列表查询
+	 * 角色列表查询
 	 * 
 	 * @param role
 	 * @return
@@ -131,7 +138,7 @@ public class SysRoleController extends BaseController {
 	}
 
 	/**
-	 * 更新
+	 * 更新角色
 	 * 
 	 * @param role
 	 * @return
@@ -140,8 +147,10 @@ public class SysRoleController extends BaseController {
 	public AjaxResult update(@Validated @RequestBody SysRole role) {
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		SysUser user = loginUser.getUser();
+		// 当前登录用户的角色set
 		Set<Long> roleIdOfUser = roleService.listByUserId(user.getId()).stream().map(v -> v.getId())
 				.collect(Collectors.toSet());
+		// 如果待修改的角色被当前登录用户使用，则登录用户不能修改该角色
 		if (roleIdOfUser.contains(role.getId())) {
 			return AjaxResult.error("不允许修改本人的关联权限");
 		}

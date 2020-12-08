@@ -44,7 +44,6 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return userRoleMapper.deleteByPrimaryKey(id);
 	}
 
@@ -56,7 +55,6 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
 
 	@Override
 	public SysUserRole selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return userRoleMapper.selectByPrimaryKey(id);
 	}
 
@@ -91,8 +89,8 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
 
 		Set<Long> roleIdToBeInsert = newRoleIdSet.stream().filter(v -> !oldRoleIdSet.contains(v))
 				.collect(Collectors.toSet());
-		Set<Long> roleIdToBeDelete = oldRoleIdSet.stream().filter(v -> !newRoleIdSet.contains(v))
-				.collect(Collectors.toSet());
+		List<Long> roleIdToBeDelete = oldRoleIdSet.stream().filter(v -> !newRoleIdSet.contains(v))
+				.collect(Collectors.toList());
 		Integer count = 0;
 		for (Long roleId : roleIdToBeInsert) {
 			SysUserRole item = new SysUserRole();
@@ -100,12 +98,11 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
 			item.setUserId(user.getId());
 			count += insertSelective(item);
 		}
-		for (Long roleId : roleIdToBeDelete) {
-			SysUserRoleExample example = new SysUserRoleExample();
-			example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdEqualTo(roleId)
-					.andUserIdEqualTo(user.getId());
-			count += userRoleMapper.deleteByExample(example);
-		}
+
+		SysUserRoleExample example = new SysUserRoleExample();
+		example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdIn(roleIdToBeDelete)
+				.andUserIdEqualTo(user.getId());
+		count += userRoleMapper.deleteByExample(example);
 		return count;
 	}
 

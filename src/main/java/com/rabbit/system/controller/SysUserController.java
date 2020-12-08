@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
+import com.rabbit.common.util.BCryptUtils;
+import com.rabbit.common.util.RSAUtils;
 import com.rabbit.common.util.SecurityUtils;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
@@ -34,9 +35,16 @@ import com.rabbit.system.domain.dto.SysUserDTO;
 import com.rabbit.system.service.ISysAccountService;
 import com.rabbit.system.service.ISysDeptService;
 import com.rabbit.system.service.ISysDeptUserService;
+import com.rabbit.system.service.ISysRoleService;
 import com.rabbit.system.service.ISysUserRoleService;
 import com.rabbit.system.service.ISysUserService;
 
+/**
+ * 用户管理controller
+ * 
+ * @author wlfei
+ *
+ */
 @RestController
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController {
@@ -53,14 +61,19 @@ public class SysUserController extends BaseController {
 	ISysUserRoleService userRoleService;
 	@Autowired
 	TokenService tokenService;
+	@Autowired
+	ISysRoleService roleService;
 	/**
 	 * 默认明文密码
 	 */
 	@Value("${user.defaultPassword}")
 	private String DEFAULT_RAW_PASSWORD;
 
+	@Value("${rsa.privateKey}")
+	private String rsaPrivateKey;
+
 	/**
-	 * 按账号模糊查询，前端以用户为维度展示
+	 * 获取用户列表，前端以用户为维度展示
 	 * 
 	 * @param userDTO
 	 * @return
@@ -74,6 +87,7 @@ public class SysUserController extends BaseController {
 		List<SysUserDTO> userDTOList = new ArrayList<SysUserDTO>();
 		if (StringUtils.isNotEmpty(userList)) {
 			for (SysUser user : userList) {
+				// 配置用户账号
 				user.setAllAccounts(accountService.listByUserId(user.getId()));
 				SysUserDTO dto = userService.user2dto(user);
 				userDTOList.add(dto);
@@ -84,20 +98,35 @@ public class SysUserController extends BaseController {
 	}
 
 	/**
-	 * 新增
+	 * 新增用户<br>
+	 * 限制：登录用户非管理员的，不能新建包含管理员角色、部门的用户
 	 * 
 	 * @param userDTO
 	 * @return
 	 */
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysUserDTO userDTO) {
+		// 非管理员不能创建管理员账号
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
+		if (loginUserNotAdmin) {
+			// 角色不能包含管理员
+			boolean hasAdminRole = roleService.isContainsAdminRole(userDTO.getRoleIds());
+			if (hasAdminRole) {
+				return AjaxResult.error("非管理员不能创建管理员账号");
+			}
+			// 部门不能包含管理员
+			boolean iAmAdminDept = deptService.isAdminDept(userDTO.getDeptId());
+			if (iAmAdminDept) {
+				return AjaxResult.error("非管理员不能调整管理员部门");
+			}
+		}
 		// 删除状态设置
 		userDTO.setDeleted(false);
 		// 进行加密
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		String encodePassword = encoder.encode(DEFAULT_RAW_PASSWORD);
+		String encodePassword = BCryptUtils.encode(DEFAULT_RAW_PASSWORD);
 		// 初始化密码设置
-		String salt = SecurityUtils.genSalt(); // 字段弃用
+		String salt = SecurityUtils.genSalt(); // salt字段已弃用
 		SysUser user = userService.dto2User(userDTO);
 		user.setSalt(salt);
 		user.setPassword(encodePassword);
@@ -111,7 +140,7 @@ public class SysUserController extends BaseController {
 	}
 
 	/**
-	 * 获取详情
+	 * 获取用户详情
 	 * 
 	 * @param userId
 	 * @return
@@ -135,7 +164,8 @@ public class SysUserController extends BaseController {
 	}
 
 	/**
-	 * 删除
+	 * 删除用户<br>
+	 * 限制：登录用户非管理员的，不能删除管理员用户
 	 * 
 	 * @param userId
 	 * @return
@@ -144,7 +174,7 @@ public class SysUserController extends BaseController {
 	public AjaxResult delete(@PathVariable Long[] userIds) {
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
-
+		// 删除前校验，一个不通过的，不允许删除
 		for (Long userId : userIds) {
 			ValidResult checkResult = userService.validCheckBeforeDelete(userId);
 			if (checkResult.hasError()) {
@@ -154,9 +184,9 @@ public class SysUserController extends BaseController {
 			boolean thisUserAdmin = userService.isAdmin(userId);
 			// 非超级管理员不能修改超级管理员信息
 			if (loginUserNotAdmin && thisUserAdmin) {
-				return AjaxResult.error("非超级管理员不能删除超级管理员");
+				return AjaxResult.error("非管理员不能删除管理员");
 			}
-
+			// 不允许删除当前登录用户
 			if (loginUser.getUser().getId().equals(userId)) {
 				return AjaxResult.error("不允许删除登录用户账号");
 			}
@@ -166,7 +196,8 @@ public class SysUserController extends BaseController {
 	}
 
 	/**
-	 * 更新
+	 * 更新用户<br>
+	 * 限制：登录用户非管理员的，不能修改管理员用户信息，不能创建管理员用户
 	 * 
 	 * @param userDTO
 	 * @return
@@ -179,22 +210,39 @@ public class SysUserController extends BaseController {
 		userDTO.setPassword(null);
 
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		// 非超级管理员不能修改超级管理员信息
-		if (userService.isNotAdmin(loginUser.getUser().getId())) {
-			if (userService.isAdmin(userDTO.getUserId())) {
-				return AjaxResult.error("非超级管理员不能修改超级管理员信息");
+		// 不能修改当前登录用户
+		if (loginUser.getUser().getId().equals(userDTO.getUserId())) {
+			return AjaxResult.error("不能修改当前登录用户信息");
+		}
+		// 非管理员不能调整管理员账号
+		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
+		if (loginUserNotAdmin) {
+			// 不能修改已有的管理员用户
+			boolean userIsAdmin = userService.isAdmin(userDTO.getUserId());
+			if (userIsAdmin) {
+				return AjaxResult.error("非管理员不能修改管理员信息");
+			}
+			// 更新的角色ID中不能包含管理员角色
+			boolean hasAdminRole = roleService.isContainsAdminRole(userDTO.getRoleIds());
+			if (hasAdminRole) {
+				return AjaxResult.error("非管理员不能创建管理员账号");
+			}
+			// 更新的部门不能包含管理员角色
+			boolean iAmAdminDept = deptService.isAdminDept(userDTO.getDeptId());
+			if (iAmAdminDept) {
+				return AjaxResult.error("非管理员不能调整管理员部门");
 			}
 		}
 
 		if (loginUser.getUser().getId().equals(userDTO.getUserId())) {
 			return AjaxResult.error("不允许修改登录用户信息");
 		}
+		// 更新前校验
 		SysUser user = userService.dto2User(userDTO);
 		ValidResult checkResult = userService.validCheckBeforeUpdate(user);
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());
 		}
-		logger.debug("更新用户信息：" + user);
 		userService.updateSelective(user);
 		return AjaxResult.success();
 	}
@@ -214,17 +262,16 @@ public class SysUserController extends BaseController {
 		// 非超级管理员不能修改超级管理员信息
 		if (userService.isNotAdmin(loginUser.getUser().getId())) {
 			if (userService.isAdmin(userDTO.getUserId())) {
-				return AjaxResult.error("非超级管理员不能修改超级管理员信息");
+				return AjaxResult.error("非管理员不能修改管理员信息");
 			}
 		}
 
 		SysUser user = new SysUser();
 		user.setId(userDTO.getUserId());
 		// 密码设置
-		String salt = SecurityUtils.genSalt();
-		// 进行加密
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		String encodePassword = encoder.encode(userDTO.getPassword());
+		String salt = SecurityUtils.genSalt(); // 弃用字段
+		String rawPassword = RSAUtils.decrypt(rsaPrivateKey, userDTO.getPassword());
+		String encodePassword = BCryptUtils.encode(rawPassword);
 		user.setSalt(salt);
 		user.setPassword(encodePassword);
 

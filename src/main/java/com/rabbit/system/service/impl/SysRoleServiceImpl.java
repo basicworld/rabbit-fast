@@ -3,7 +3,6 @@ package com.rabbit.system.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,12 +64,14 @@ public class SysRoleServiceImpl implements ISysRoleService {
 	@Override
 	@Transactional
 	public Integer deleteByPrimaryKey(Long[] roleIds) {
-		Integer count = 0;
-		for (Long roleId : roleIds) {
-			roleMenuService.deleteByRoleId(roleId);
-			count += roleMapper.deleteByPrimaryKey(roleId);
+		if (StringUtils.isEmpty(roleIds)) {
+			return 0;
 		}
-		return count;
+		List<Long> roleIdList = Stream.of(roleIds).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+		SysRoleExample example = new SysRoleExample();
+		example.createCriteria().andIdIn(roleIdList);
+		return roleMapper.deleteByExample(example);
+
 	}
 
 	@Override
@@ -178,14 +179,17 @@ public class SysRoleServiceImpl implements ISysRoleService {
 		SysRoleExample example = new SysRoleExample();
 		SysRoleExample.Criteria c1 = example.createCriteria();
 		if (StringUtils.isNotNull(role)) {
+			// 删除标记
 			if (StringUtils.isNull(role.getDeleted()) || false == role.getDeleted()) {
 				c1.andDeletedEqualTo(false);
 			} else {
 				c1.andDeletedEqualTo(true);
 			}
+			// 角色代码
 			if (StringUtils.isNotNull(role.getCode())) {
 				c1.andCodeLike(SqlUtil.getFuzzQueryParam(role.getCode()));
 			}
+			// 角色名称
 			if (StringUtils.isNotNull(role.getName())) {
 				c1.andNameLike(SqlUtil.getFuzzQueryParam(role.getName()));
 			}
@@ -199,14 +203,17 @@ public class SysRoleServiceImpl implements ISysRoleService {
 		if (StringUtils.isEmpty(roleIds)) {
 			return roles;
 		}
-		Set<Long> uniqueRoleIds = Stream.of(roleIds).collect(Collectors.toSet());
-		for (Long roleId : uniqueRoleIds) {
-			SysRole role = selectByPrimaryKey(roleId);
-			if (StringUtils.isNotNull(role)) {
-				roles.add(role);
-			}
-		}
-		return roles;
+		List<Long> uniqueRoleIds = Stream.of(roleIds).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+		SysRoleExample example = new SysRoleExample();
+		example.createCriteria().andIdIn(uniqueRoleIds);
+		return roleMapper.selectByExample(example);
+
+	}
+
+	@Override
+	public List<SysRole> listByDeptId(Long deptId) {
+		Long[] roleIds = deptRoleService.listByDeptId(deptId).stream().map(v -> v.getRoleId()).toArray(Long[]::new);
+		return listByPrimaryKeys(roleIds);
 	}
 
 	@Override
@@ -227,6 +234,48 @@ public class SysRoleServiceImpl implements ISysRoleService {
 		List<SysRole> roles = listByPrimaryKeys(allRoleIds);
 
 		return roles;
+	}
+
+	@Override
+	public Boolean isContainsAdminRole(Long[] roleIds) {
+		if (StringUtils.isEmpty(roleIds)) {
+			return false;
+		}
+		for (Long roleId : roleIds) {
+			boolean iAmAdmin = isAdminRole(roleId);
+			if (iAmAdmin) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public Boolean isAdminRole(Long roleId) {
+		if (StringUtils.isNull(roleId)) {
+			return false;
+		}
+		SysRole role = selectByPrimaryKey(roleId);
+		if (StringUtils.isNull(role)) {
+			return false;
+		}
+		if (RoleConstants.ADMIN_ROLE_CODE.equals(role.getCode())) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Boolean isContainsAdminRole(List<SysRole> roleList) {
+		if (StringUtils.isEmpty(roleList)) {
+			return false;
+		}
+		for (SysRole role : roleList) {
+			if (RoleConstants.ADMIN_ROLE_CODE.equals(role.getCode())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

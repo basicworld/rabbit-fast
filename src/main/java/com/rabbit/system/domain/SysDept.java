@@ -34,10 +34,20 @@ public class SysDept {
 
 	private Long[] userIds;
 
+	/**
+	 * 关联角色ID
+	 * 
+	 * @return
+	 */
 	public Long[] getRoleIds() {
 		return roleIds;
 	}
 
+	/**
+	 * 关联用户ID
+	 * 
+	 * @return
+	 */
 	public Long[] getUserIds() {
 		return userIds;
 	}
@@ -50,6 +60,11 @@ public class SysDept {
 		this.userIds = userIds;
 	}
 
+	/**
+	 * 子部门列表
+	 * 
+	 * @return
+	 */
 	public List<SysDept> getChildren() {
 		return children;
 	}
@@ -58,6 +73,11 @@ public class SysDept {
 		this.children = children;
 	}
 
+	/**
+	 * 部门主键
+	 * 
+	 * @return
+	 */
 	public Long getId() {
 		return id;
 	}
@@ -66,6 +86,11 @@ public class SysDept {
 		this.id = id;
 	}
 
+	/**
+	 * 父ID
+	 * 
+	 * @return
+	 */
 	public Long getParentId() {
 		return parentId;
 	}
@@ -74,6 +99,11 @@ public class SysDept {
 		this.parentId = parentId;
 	}
 
+	/**
+	 * 部门全称，最多50字
+	 * 
+	 * @return
+	 */
 	@Size(min = 0, max = 50, message = "部门全称长度不能超过50个字符")
 	public String getFullname() {
 		return fullname;
@@ -83,6 +113,11 @@ public class SysDept {
 		this.fullname = fullname == null ? null : fullname.trim();
 	}
 
+	/**
+	 * 部门简称，最多50字
+	 * 
+	 * @return
+	 */
 	@Size(min = 0, max = 50, message = "部门简称长度不能超过50个字符")
 	public String getName() {
 		return name;
@@ -92,6 +127,11 @@ public class SysDept {
 		this.name = name == null ? null : name.trim();
 	}
 
+	/**
+	 * 机构代码，不能为空
+	 * 
+	 * @return
+	 */
 	@NotBlank(message = "机构代码不能为空")
 	public String getOrgcode() {
 		return orgcode;

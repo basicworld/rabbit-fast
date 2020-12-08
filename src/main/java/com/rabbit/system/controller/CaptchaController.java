@@ -10,11 +10,22 @@ import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.system.domain.Captcha;
 import com.rabbit.system.service.ICaptchaService;
 
+/**
+ * 验证码controller
+ * 
+ * @author wlfei
+ *
+ */
 @RestController
 public class CaptchaController {
 	@Autowired
 	ICaptchaService captchaService;
 
+	/**
+	 * 获取验证码
+	 * 
+	 * @return
+	 */
 	@GetMapping("/captcha")
 	public AjaxResult getCaptcha() {
 		try {

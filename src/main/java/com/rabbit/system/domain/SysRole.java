@@ -5,6 +5,12 @@ import java.util.Date;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * 角色
+ * 
+ * @author wlfei
+ *
+ */
 public class SysRole {
 	private Long id;
 
@@ -26,6 +32,11 @@ public class SysRole {
 
 	private Long[] menuIds;
 
+	/**
+	 * 关联菜单主键
+	 * 
+	 * @return
+	 */
 	public Long[] getMenuIds() {
 		return menuIds;
 	}
@@ -34,6 +45,11 @@ public class SysRole {
 		this.menuIds = menuIds;
 	}
 
+	/**
+	 * 主键
+	 * 
+	 * @return
+	 */
 	public Long getId() {
 		return id;
 	}
@@ -42,6 +58,11 @@ public class SysRole {
 		this.id = id;
 	}
 
+	/**
+	 * 角色名称，不能为空，3-20个字符
+	 * 
+	 * @return
+	 */
 	@NotBlank(message = "角色名称不能为空")
 	@Size(min = 3, max = 20, message = "角色名称长度限制为3-20个字符")
 	public String getName() {
@@ -52,6 +73,11 @@ public class SysRole {
 		this.name = name == null ? null : name.trim();
 	}
 
+	/**
+	 * 角色代码，不能为空，5-20个字符
+	 * 
+	 * @return
+	 */
 	@NotBlank(message = "角色代码不能为空")
 	@Size(min = 5, max = 20, message = "角色代码长度限制为5-20个字符")
 	public String getCode() {
@@ -62,6 +88,11 @@ public class SysRole {
 		this.code = code == null ? null : code.trim();
 	}
 
+	/**
+	 * 描述，最多50字
+	 * 
+	 * @return
+	 */
 	@Size(max = 50)
 	public String getIntro() {
 		return intro;

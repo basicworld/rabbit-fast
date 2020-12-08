@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.security.domain.LoginUser;
+import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TreeSelect;
 import com.rabbit.system.constant.DeptConstants;
@@ -22,33 +25,66 @@ import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptRole;
 import com.rabbit.system.service.ISysDeptRoleService;
 import com.rabbit.system.service.ISysDeptService;
+import com.rabbit.system.service.ISysRoleService;
+import com.rabbit.system.service.ISysUserService;
 
+/**
+ * 部门controller
+ * 
+ * @author wlfei
+ *
+ */
 @RestController
 @RequestMapping("/system/dept")
 public class SysDeptController {
 	@Autowired
 	ISysDeptService deptService;
-	
+	@Autowired
+	ISysRoleService roleService;
+	@Autowired
+	TokenService tokenService;
+	@Autowired
+	ISysUserService userService;
+
 	@Autowired
 	ISysDeptRoleService deptRoleService;
 
+	/**
+	 * 获取部门列表
+	 * 
+	 * @param dept
+	 * @return
+	 */
 	@GetMapping("/list")
 	public AjaxResult list(SysDept dept) {
 		List<SysDept> itemList = deptService.listByDept(dept);
 		return AjaxResult.success(itemList);
 	}
+
+	/**
+	 * 获取部门详情
+	 * 
+	 * @param deptId
+	 * @return
+	 */
 	@GetMapping("/{deptId}")
 	public AjaxResult getDetail(@PathVariable Long deptId) {
 		SysDept dept = deptService.selectByPrimaryKey(deptId);
-		if(StringUtils.isNull(dept)) {
+		if (StringUtils.isNull(dept)) {
 			return AjaxResult.error("部门不存在");
 		}
 		List<SysDeptRole> deptRoleList = deptRoleService.listByDeptId(deptId);
-		Long[] roleIds = deptRoleList.stream().map(v->v.getRoleId()).toArray(Long[]::new);
+		Long[] roleIds = deptRoleList.stream().map(v -> v.getRoleId()).toArray(Long[]::new);
 		dept.setRoleIds(roleIds);
- 		return AjaxResult.success(dept);
+		return AjaxResult.success(dept);
 	}
 
+	/**
+	 * 获取部门树
+	 * 
+	 * @param dept
+	 * @return
+	 */
 	@GetMapping("/tree")
 	public AjaxResult treeList(SysDept dept) {
 		List<SysDept> itemList = deptService.listByDept(dept);
@@ -56,6 +92,12 @@ public class SysDeptController {
 		return AjaxResult.success(treeList);
 	}
 
+	/**
+	 * 获取部门下拉菜单树
+	 * 
+	 * @param dept
+	 * @return
+	 */
 	@GetMapping("/treeselect")
 	public AjaxResult treeSelect(SysDept dept) {
 		List<SysDept> itemList = deptService.listByDept(dept);
@@ -64,13 +106,23 @@ public class SysDeptController {
 	}
 
 	/**
-	 * 新增
+	 * 新增部门<br>
+	 * 限制：登录用户非管理员的，不允许创建管理员部门
 	 * 
 	 * @param dept
 	 * @return
 	 */
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysDept dept) {
+		// 登录用户非管理员的，不能创建包含管理员角色的部门
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
+		if (loginUserNotAdmin) {
+			boolean containAdminRole = roleService.isContainsAdminRole(dept.getRoleIds());
+			if (containAdminRole) {
+				return AjaxResult.error("非管理员用户不能创建包含管理员角色的部门");
+			}
+		}
 		if (StringUtils.isNull(dept.getParentId())) {
 			dept.setParentId(DeptConstants.ROOT_DEPT_ID);
 		}
@@ -82,8 +134,24 @@ public class SysDeptController {
 		return AjaxResult.success();
 	}
 
+	/**
+	 * 删除<br>
+	 * 限制：登录用户非管理员的，不允许删除管理员部门
+	 * 
+	 * @param deptId
+	 * @return
+	 */
 	@DeleteMapping("/{deptId}")
 	public AjaxResult delete(@PathVariable Long deptId) {
+		// 登录用户非管理员的，不能删除包含管理员角色的部门
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
+		if (loginUserNotAdmin) {
+			boolean deptIsAdmin = deptService.isAdminDept(deptId);
+			if (deptIsAdmin) {
+				return AjaxResult.error("非管理员用户不能删除包含管理员角色的部门");
+			}
+		}
 		ValidResult checkResult = deptService.validCheckBeforeDelete(deptId);
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());
@@ -93,13 +161,29 @@ public class SysDeptController {
 	}
 
 	/**
-	 * 更新
+	 * 更新<br>
+	 * 限制：登录用户非管理员的，不允许修改管理员部门，不允许给部门添加管理员角色
 	 * 
 	 * @param dept
 	 * @return
 	 */
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysDept dept) {
+		// 登录用户非管理员的，不能更新包含管理员角色的部门，不能给部门添加管理员角色
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
+		if (loginUserNotAdmin) {
+			boolean deptIsAdmin = deptService.isAdminDept(dept.getId());
+			if (deptIsAdmin) {
+				return AjaxResult.error("非管理员用户不能更新包含管理员角色的部门");
+			}
+
+			boolean containAdminRole = roleService.isContainsAdminRole(dept.getRoleIds());
+			if (containAdminRole) {
+				return AjaxResult.error("不能给部门添加管理员角色");
+			}
+		}
+
 		ValidResult checkResult = deptService.validCheckBeforeUpdate(dept);
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());

@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.rabbit.common.core.text.StrFormatter;
 
-
 /**
  * 字符串工具类
  * 

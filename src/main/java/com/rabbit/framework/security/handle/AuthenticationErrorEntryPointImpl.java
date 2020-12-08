@@ -28,6 +28,7 @@ public class AuthenticationErrorEntryPointImpl implements AuthenticationEntryPoi
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e)
 			throws IOException {
+		// 返回认证失败
 		int code = ResultConstants.CODE_AUTH_FAIL;
 		String msg = StringUtils.format("请求访问：{}，认证失败，无法访问系统资源", request.getRequestURI());
 		ServletUtils.renderString(response, JSON.toJSONString(AjaxResult.error(code, msg)));

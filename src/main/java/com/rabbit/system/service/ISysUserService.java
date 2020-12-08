@@ -8,10 +8,17 @@ import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
 
+/**
+ * 用户service
+ * 
+ * @author wlfei
+ *
+ */
 public interface ISysUserService extends BaseService<SysUser>, ValidCheckService<SysUser> {
 
 	/**
-	 * SysAccount to SysUser
+	 * SysAccount to SysUser<br>
+	 * 输入的账号存储在user.account
 	 * 
 	 * @param accountList
 	 * @return
@@ -19,7 +26,8 @@ public interface ISysUserService extends BaseService<SysUser>, ValidCheckService
 	List<SysUser> account2User(List<SysAccount> accountList);
 
 	/**
-	 * SysAccount to SysUser
+	 * SysAccount to SysUser<br>
+	 * 输入的账号存储在user.account
 	 * 
 	 * @param accountList
 	 * @return
@@ -27,7 +35,8 @@ public interface ISysUserService extends BaseService<SysUser>, ValidCheckService
 	SysUser account2User(SysAccount account);
 
 	/**
-	 * 前端传回的dto转为user
+	 * 前端传回的dto转为user<br>
+	 * 账号信息存储在user.allAccounts
 	 * 
 	 * @param userDTO
 	 * @return
@@ -35,7 +44,8 @@ public interface ISysUserService extends BaseService<SysUser>, ValidCheckService
 	SysUser dto2User(SysUserDTO userDTO);
 
 	/**
-	 * user转为前端需要的dto
+	 * user转为前端需要的dto<br>
+	 * user.allAccounts转为dto的字段进行存储
 	 * 
 	 * @param user
 	 * @return
@@ -82,6 +92,12 @@ public interface ISysUserService extends BaseService<SysUser>, ValidCheckService
 	 */
 	Boolean isAdmin(Long userId);
 
+	/**
+	 * 判断用户非超级管理员
+	 * 
+	 * @param userId
+	 * @return
+	 */
 	Boolean isNotAdmin(Long userId);
 
 }

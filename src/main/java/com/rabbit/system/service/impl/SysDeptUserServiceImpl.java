@@ -32,7 +32,6 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return deptUserMapper.deleteByPrimaryKey(id);
 	}
 
@@ -44,7 +43,6 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 
 	@Override
 	public SysDeptUser selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return deptUserMapper.selectByPrimaryKey(id);
 	}
 
@@ -88,8 +86,8 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 		Set<Long> userIdToBeInsert = newUserIdSet.stream().filter(v -> !oldUserIdSet.contains(v))
 				.collect(Collectors.toSet());
 		// 数据库待删除 用户ID
-		Set<Long> userIdToBeDelete = oldUserIdSet.stream().filter(v -> !newUserIdSet.contains(v))
-				.collect(Collectors.toSet());
+		List<Long> userIdToBeDelete = oldUserIdSet.stream().filter(v -> !newUserIdSet.contains(v))
+				.collect(Collectors.toList());
 
 		Integer count = 0;
 		// 新增
@@ -100,12 +98,10 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 			count += insertSelective(item);
 		}
 		// 删除
-		for (Long userId : userIdToBeDelete) {
-			SysDeptUserExample example = new SysDeptUserExample();
-			example.createCriteria().andDeptIdGreaterThan(new Long(0)).andUserIdEqualTo(userId)
-					.andDeptIdEqualTo(deptId);
-			count += deptUserMapper.deleteByExample(example);
-		}
+		SysDeptUserExample example = new SysDeptUserExample();
+		example.createCriteria().andDeptIdGreaterThan(new Long(0)).andUserIdIn(userIdToBeDelete)
+				.andDeptIdEqualTo(deptId);
+		count += deptUserMapper.deleteByExample(example);
 		return count;
 	}
 

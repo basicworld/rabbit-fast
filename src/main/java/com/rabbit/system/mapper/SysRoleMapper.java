@@ -5,24 +5,30 @@ import com.rabbit.system.domain.SysRoleExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
+/**
+ * 角色mapper
+ * 
+ * @author wlfei
+ *
+ */
 public interface SysRoleMapper {
-    int deleteByExample(SysRoleExample example);
+	int deleteByExample(SysRoleExample example);
 
-    int deleteByPrimaryKey(Long id);
+	int deleteByPrimaryKey(Long id);
 
-    int insert(SysRole record);
+	int insert(SysRole record);
 
-    int insertSelective(SysRole record);
+	int insertSelective(SysRole record);
 
-    List<SysRole> selectByExample(SysRoleExample example);
+	List<SysRole> selectByExample(SysRoleExample example);
 
-    SysRole selectByPrimaryKey(Long id);
+	SysRole selectByPrimaryKey(Long id);
 
-    int updateByExampleSelective(@Param("record") SysRole record, @Param("example") SysRoleExample example);
+	int updateByExampleSelective(@Param("record") SysRole record, @Param("example") SysRoleExample example);
 
-    int updateByExample(@Param("record") SysRole record, @Param("example") SysRoleExample example);
+	int updateByExample(@Param("record") SysRole record, @Param("example") SysRoleExample example);
 
-    int updateByPrimaryKeySelective(SysRole record);
+	int updateByPrimaryKeySelective(SysRole record);
 
-    int updateByPrimaryKey(SysRole record);
+	int updateByPrimaryKey(SysRole record);
 }

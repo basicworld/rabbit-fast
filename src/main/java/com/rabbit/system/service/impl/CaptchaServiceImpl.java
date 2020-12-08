@@ -17,7 +17,6 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 import com.google.code.kaptcha.Producer;
 import com.rabbit.common.constant.BaseConstants;
-import com.rabbit.common.core.text.StrFormatter;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.framework.redis.RedisCache;
 import com.rabbit.system.domain.Captcha;
@@ -36,7 +35,6 @@ public class CaptchaServiceImpl implements ICaptchaService {
 
 	@Override
 	public Captcha create() throws IOException {
-		// TODO Auto-generated method stub
 		String uuid = UUID.randomUUID().toString().replace("-", "");
 
 		String capStr = null, code = null;
@@ -64,8 +62,6 @@ public class CaptchaServiceImpl implements ICaptchaService {
 		String redisKey = genCaptchaRedisKey(uuid);
 
 		redisCache.setCacheObject(redisKey, code, BaseConstants.CAPTCHA_EXPIRATION, TimeUnit.MINUTES);
-		String logStr = StrFormatter.format("write captcha to redis, key={}, code={}", redisKey, code);
-		logger.debug(logStr);
 		return cap;
 	}
 

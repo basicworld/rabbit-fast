@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rabbit.common.core.text.StrFormatter;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.sql.SqlUtil;
 import com.rabbit.common.util.valid.ValidResult;
@@ -17,10 +18,12 @@ import com.rabbit.system.constant.DeptConstants;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptExample;
 import com.rabbit.system.domain.SysDeptUser;
+import com.rabbit.system.domain.SysRole;
 import com.rabbit.system.mapper.SysDeptMapper;
 import com.rabbit.system.service.ISysDeptRoleService;
 import com.rabbit.system.service.ISysDeptService;
 import com.rabbit.system.service.ISysDeptUserService;
+import com.rabbit.system.service.ISysRoleService;
 
 @Service
 public class SysDeptServiceImpl implements ISysDeptService {
@@ -31,6 +34,9 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
 	@Autowired
 	ISysDeptRoleService deptRoleService;
+
+	@Autowired
+	ISysRoleService roleService;
 
 	@Override
 	@Transactional
@@ -73,7 +79,6 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
 	@Override
 	public SysDept selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return deptMapper.selectByPrimaryKey(id);
 	}
 
@@ -85,6 +90,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
 		SysDeptExample.Criteria c2 = example.createCriteria();
 
 		if (StringUtils.isNotNull(dept)) {
+			// 删除标记
 			if (StringUtils.isNull(dept.getDeleted()) || false == dept.getDeleted()) {
 				c1.andDeletedEqualTo(false);
 				c2.andDeletedEqualTo(false);
@@ -92,14 +98,18 @@ public class SysDeptServiceImpl implements ISysDeptService {
 				c1.andDeletedEqualTo(true);
 				c2.andDeletedEqualTo(true);
 			}
+			// 机构代码
 			if (StringUtils.isNotNull(dept.getOrgcode())) {
 				String param = SqlUtil.getFuzzQueryParam(dept.getOrgcode());
 				c1.andOrgcodeLike(param);
 				c2.andOrgcodeLike(param);
 			}
+			// 机构名称
 			if (StringUtils.isNotNull(dept.getName())) {
 				String name = SqlUtil.getFuzzQueryParam(dept.getName());
 				c1.andNameLike(name);
+				c2.andNameLike(name);
+				c1.andFullnameLike(name);
 				c2.andFullnameLike(name);
 			}
 		}
@@ -117,6 +127,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
 	@Override
 	public List<SysDept> buildDeptTree(List<SysDept> deptList) {
 		// https://blog.csdn.net/u011862015/article/details/105009656
+		// 数据转为以父ID为key的字典，value是父ID相同的机构列表
 		Map<Long, List<SysDept>> deptByParentIdMap = deptList.stream()
 				.collect(Collectors.groupingBy(SysDept::getParentId));
 		deptList.forEach(dept -> dept.setChildren(deptByParentIdMap.get(dept.getId())));
@@ -126,14 +137,16 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
 	@Override
 	public ValidResult validCheckBeforeInsert(SysDept dept) {
+		// 相同机构全称、机构简称校验
 		List<SysDept> deptWithSameNameList = listByNameEqualsTo(dept.getName());
 		List<SysDept> deptWithSameFullnameList = listByNameEqualsTo(dept.getFullname());
 		if (deptWithSameNameList.size() > 0 || deptWithSameFullnameList.size() > 0) {
 			return ValidResult.error("机构全称或机构简称重复");
 		}
+		// 机构代码重复校验
 		List<SysDept> deptWithSameOrgcodeList = listByOrgcodeEqualsTo(dept.getOrgcode());
 		if (deptWithSameOrgcodeList.size() > 0) {
-			return ValidResult.error("组织机构代码重复");
+			return ValidResult.error("组织机构代码重复，冲突机构全称：" + deptWithSameOrgcodeList.get(0).getFullname());
 		}
 
 		return ValidResult.success();
@@ -187,19 +200,21 @@ public class SysDeptServiceImpl implements ISysDeptService {
 		c1.andParentIdEqualTo(id);
 		List<SysDept> children = deptMapper.selectByExample(example);
 		if (children.size() > 0) {
-			return ValidResult.error("存在子部门，不能删除");
+			String warning = StrFormatter.format("存在{}个子部门，不能删除", children.size());
+			return ValidResult.error(warning);
 		}
 		// 检查下属用户
 		List<SysDeptUser> deptUserList = deptUserService.listByDeptId(id);
 		if (deptUserList.size() > 0) {
-			return ValidResult.error("存在用户，不能删除");
+			String warning = StrFormatter.format("存在{}个用户，不能删除", deptUserList.size());
+			return ValidResult.error(warning);
 		}
 		return ValidResult.success();
 	}
 
 	@Override
 	public List<SysDept> listByNameEqualsTo(String name) {
-		// 机构全称或机构简称重复
+		// 机构全称或机构简称
 		SysDeptExample nameExample = new SysDeptExample();
 		SysDeptExample.Criteria c1 = nameExample.createCriteria();
 		c1.andNameEqualTo(name);
@@ -211,11 +226,20 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
 	@Override
 	public List<SysDept> listByOrgcodeEqualsTo(String orgcode) {
-		// 组织机构代码重复
+		// 组织机构代码
 		SysDeptExample orgcodeExample = new SysDeptExample();
 		orgcodeExample.createCriteria().andOrgcodeEqualTo(orgcode);
 		return deptMapper.selectByExample(orgcodeExample);
 
+	}
+
+	@Override
+	public Boolean isAdminDept(Long deptId) {
+		if (StringUtils.isNull(deptId)) {
+			return false;
+		}
+		List<SysRole> roles = roleService.listByDeptId(deptId);
+		return roleService.isContainsAdminRole(roles);
 	}
 
 }

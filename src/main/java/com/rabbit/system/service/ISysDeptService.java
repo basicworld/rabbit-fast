@@ -7,6 +7,12 @@ import com.rabbit.framework.web.page.TreeSelect;
 import com.rabbit.system.base.BaseService;
 import com.rabbit.system.domain.SysDept;
 
+/**
+ * 部门service
+ * 
+ * @author wlfei
+ *
+ */
 public interface ISysDeptService extends BaseService<SysDept>, ValidCheckService<SysDept> {
 	/**
 	 * 根据机构全称或简称 等值查询
@@ -47,5 +53,13 @@ public interface ISysDeptService extends BaseService<SysDept>, ValidCheckService
 	 * @return 下拉树
 	 */
 	List<TreeSelect> buildDeptTreeSelect(List<SysDept> deptList);
+
+	/**
+	 * 判断部门是否具有超级管理员权限
+	 * 
+	 * @param deptId
+	 * @return
+	 */
+	Boolean isAdminDept(Long deptId);
 
 }

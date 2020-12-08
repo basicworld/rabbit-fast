@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.rabbit.common.util.StringUtils;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptRole;
 import com.rabbit.system.domain.SysDeptRoleExample;
@@ -31,7 +30,6 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return deptRoleMapper.deleteByPrimaryKey(id);
 	}
 
@@ -43,7 +41,6 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 
 	@Override
 	public SysDeptRole selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return deptRoleMapper.selectByPrimaryKey(id);
 	}
 
@@ -73,9 +70,8 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 			return 0; // 无需更新
 		}
 		if (existItems.size() > 1) {
-			String message = StringUtils.format("部门角色表存在重复记录，严重异常！查询条件：deptId={},roleId={}", deptRole.getDeptId(),
-					deptRole.getRoleId());
-			throw new RuntimeException(message);
+			deptRoleMapper.deleteByExample(example);
+			return insertSelective(deptRole);
 		}
 		return 0;
 	}
@@ -111,8 +107,8 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 		Set<Long> roleIdsToBeInsert = newRoleIdSet.stream().filter(v -> !oldRoleIdSet.contains(v))
 				.collect(Collectors.toSet());
 		// 数据库待删除的角色ID
-		Set<Long> roleIdsToBeDelete = oldRoleIdSet.stream().filter(v -> !newRoleIdSet.contains(v))
-				.collect(Collectors.toSet());
+		List<Long> roleIdsToBeDelete = oldRoleIdSet.stream().filter(v -> !newRoleIdSet.contains(v))
+				.collect(Collectors.toList());
 		// 新增
 		for (Long roleId : roleIdsToBeInsert) {
 			SysDeptRole item = new SysDeptRole();
@@ -121,11 +117,9 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 			count += insertSelective(item);
 		}
 		// 删除
-		for (Long roleId : roleIdsToBeDelete) {
-			SysDeptRoleExample example = new SysDeptRoleExample();
-			example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdEqualTo(roleId).andDeptIdEqualTo(deptId);
-			count += deptRoleMapper.deleteByExample(example);
-		}
+		SysDeptRoleExample example = new SysDeptRoleExample();
+		example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdIn(roleIdsToBeDelete).andDeptIdEqualTo(deptId);
+		count += deptRoleMapper.deleteByExample(example);
 		return count;
 	}
 

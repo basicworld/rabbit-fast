@@ -20,6 +20,11 @@ public class Captcha {
 	 */
 	private String uuid;
 
+	/**
+	 * 原始信息 验证码结果
+	 * 
+	 * @return
+	 */
 	public String getCode() {
 		return code;
 	}
@@ -28,10 +33,20 @@ public class Captcha {
 		this.code = code;
 	}
 
+	/**
+	 * 图片base64编码
+	 * 
+	 * @return
+	 */
 	public String getBase64() {
 		return base64;
 	}
 
+	/**
+	 * 唯一ID
+	 * 
+	 * @return
+	 */
 	public String getUuid() {
 		return uuid;
 	}

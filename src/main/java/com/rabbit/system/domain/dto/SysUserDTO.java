@@ -68,6 +68,11 @@ public class SysUserDTO {
 
 	private Long[] roleIds;
 
+	/**
+	 * 账号类型
+	 * 
+	 * @return
+	 */
 	public Integer getCategory() {
 		return category;
 	}
@@ -76,18 +81,38 @@ public class SysUserDTO {
 		this.category = category;
 	}
 
+	/**
+	 * 手机
+	 * 
+	 * @return
+	 */
 	public String getPhone() {
 		return phone;
 	}
 
+	/**
+	 * 邮箱
+	 * 
+	 * @return
+	 */
 	public String getEmail() {
 		return email;
 	}
 
+	/**
+	 * 身份证
+	 * 
+	 * @return
+	 */
 	public String getIdcard() {
 		return idcard;
 	}
 
+	/**
+	 * 微信
+	 * 
+	 * @return
+	 */
 	public String getWechat() {
 		return wechat;
 	}
@@ -108,6 +133,11 @@ public class SysUserDTO {
 		this.wechat = wechat;
 	}
 
+	/**
+	 * 部门名称
+	 * 
+	 * @return
+	 */
 	public String getDeptName() {
 		return deptName;
 	}
@@ -116,6 +146,11 @@ public class SysUserDTO {
 		this.deptName = deptName;
 	}
 
+	/**
+	 * 角色ID
+	 * 
+	 * @return
+	 */
 	public Long[] getRoleIds() {
 		return roleIds;
 	}
@@ -124,6 +159,11 @@ public class SysUserDTO {
 		this.roleIds = roleIds;
 	}
 
+	/**
+	 * 部门ID
+	 * 
+	 * @return
+	 */
 	public Long getDeptId() {
 		return deptId;
 	}
@@ -141,6 +181,11 @@ public class SysUserDTO {
 
 	}
 
+	/**
+	 * 删除标记
+	 * 
+	 * @return
+	 */
 	public Boolean getDeleted() {
 		return deleted;
 	}
@@ -149,24 +194,49 @@ public class SysUserDTO {
 		this.deleted = deleted;
 	}
 
+	/**
+	 * 用户ID
+	 * 
+	 * @return
+	 */
 	public Long getUserId() {
 		return userId;
 	}
 
+	/**
+	 * 昵称，非空，2-30个字符
+	 * 
+	 * @return
+	 */
 	@Size(min = 2, max = 20, message = "昵称长度限制为2-20个字符")
 	@NotBlank(message = "昵称不能为空")
 	public String getNickname() {
 		return nickname;
 	}
 
+	/**
+	 * 密码
+	 * 
+	 * @return
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * 新密码
+	 * 
+	 * @return
+	 */
 	public String getNewPassword() {
 		return newPassword;
 	}
 
+	/**
+	 * 用户名，非空，5-30个字符
+	 * 
+	 * @return
+	 */
 	@Size(min = 5, max = 30, message = "用户名长度限制为5-30个字符")
 	@NotBlank(message = "用户名不能为空")
 	public String getUsername() {

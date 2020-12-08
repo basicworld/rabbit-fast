@@ -3,6 +3,13 @@ package com.rabbit.system.domain;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 用户账号<br>
+ * 一个用户可以有多个账号，每个类型账号只能有一个
+ * 
+ * @author wlfei
+ *
+ */
 public class SysAccount implements Serializable {
 	/**
 	 * 
@@ -31,6 +38,11 @@ public class SysAccount implements Serializable {
 		super();
 	}
 
+	/**
+	 * 账号主键
+	 * 
+	 * @return
+	 */
 	public Long getId() {
 		return id;
 	}
@@ -39,6 +51,11 @@ public class SysAccount implements Serializable {
 		this.id = id;
 	}
 
+	/**
+	 * 用户主键
+	 * 
+	 * @return
+	 */
 	public Long getUserId() {
 		return userId;
 	}
@@ -47,6 +64,11 @@ public class SysAccount implements Serializable {
 		this.userId = userId;
 	}
 
+	/**
+	 * 账号名
+	 * 
+	 * @return
+	 */
 	public String getOpenCode() {
 		return openCode;
 	}
@@ -55,6 +77,11 @@ public class SysAccount implements Serializable {
 		this.openCode = openCode == null ? null : openCode.trim();
 	}
 
+	/**
+	 * 账号类型，如用户名、邮箱、手机号
+	 * 
+	 * @return
+	 */
 	public Integer getCategory() {
 		return category;
 	}

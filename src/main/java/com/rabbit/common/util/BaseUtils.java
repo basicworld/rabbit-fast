@@ -2,6 +2,12 @@ package com.rabbit.common.util;
 
 import java.util.List;
 
+/**
+ * 基础工具包
+ * 
+ * @author wlfei
+ *
+ */
 public class BaseUtils {
 	/**
 	 * 获取list中的第一个元素

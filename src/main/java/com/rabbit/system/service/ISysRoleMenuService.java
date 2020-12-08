@@ -6,11 +6,35 @@ import com.rabbit.system.base.BaseService;
 import com.rabbit.system.domain.SysRole;
 import com.rabbit.system.domain.SysRoleMenu;
 
+/**
+ * 角色--菜单service
+ * 
+ * @author wlfei
+ *
+ */
 public interface ISysRoleMenuService extends BaseService<SysRoleMenu> {
+	/**
+	 * 根据角色主键获取列表
+	 * 
+	 * @param roleId
+	 * @return
+	 */
 	List<SysRoleMenu> listByRoleId(Long roleId);
 
+	/**
+	 * 根据角色主键获取列表
+	 * 
+	 * @param roleIds
+	 * @return
+	 */
 	List<SysRoleMenu> listByRoleId(Long[] roleIds);
 
+	/**
+	 * 根据菜单主键获取列表
+	 * 
+	 * @param menuId
+	 * @return
+	 */
 	List<SysRoleMenu> listByMenuId(Long menuId);
 
 	/**

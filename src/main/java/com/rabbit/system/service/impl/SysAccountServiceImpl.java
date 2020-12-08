@@ -46,16 +46,8 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	public Integer deleteByPrimaryKey(Long[] accountIds) {
 		Integer count = 0;
 		for (Long accountId : accountIds) {
-			// 待删除账号信息
-			SysAccount account = selectByPrimaryKey(accountId);
-			Long userId = account.getUserId();
 			// 删除账号
 			count += accountMapper.deleteByPrimaryKey(accountId);
-			// 如果该用户没有账号了，则逻辑删除用户
-			List<SysAccount> accountListOfUser = listByUserId(userId);
-			if (StringUtils.isEmpty(accountListOfUser)) {
-				userService.deleteByPrimaryKeyLogically(userId);
-			}
 
 		}
 		return count;
@@ -69,7 +61,6 @@ public class SysAccountServiceImpl implements ISysAccountService {
 
 	@Override
 	public SysAccount selectByPrimaryKey(Long id) {
-
 		return accountMapper.selectByPrimaryKey(id);
 	}
 
@@ -84,15 +75,19 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	public List<SysAccount> listByUserDTO(SysUserDTO userDTO) {
 		SysAccountExample example = new SysAccountExample();
 		SysAccountExample.Criteria c1 = example.createCriteria();
+		// 构造查询条件
 		if (StringUtils.isNotNull(userDTO)) {
+			// 设置删除标记
 			if (StringUtils.isNull(userDTO.getDeleted()) || false == userDTO.getDeleted()) {
 				c1.andDeletedEqualTo(false);
 			} else {
 				c1.andDeletedEqualTo(true);
 			}
+			// 设置账号类型
 			if (StringUtils.isNotNull(userDTO.getCategory())) {
 				c1.andCategoryEqualTo(userDTO.getCategory());
 			}
+			// 设置账号名
 			if (StringUtils.isNotNull(userDTO.getUsername())) {
 				c1.andOpenCodeLike(SqlUtil.getFuzzQueryParam(userDTO.getUsername()));
 			}
@@ -111,15 +106,15 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	@Override
 	public Integer deleteByUserId(Long userId) {
 		SysAccountExample example = new SysAccountExample();
-		example.createCriteria().andDeletedEqualTo(false).andIdGreaterThan(new Long(0)).andUserIdEqualTo(userId);
+		example.createCriteria().andIdGreaterThan(new Long(0)).andUserIdEqualTo(userId);
 		return accountMapper.deleteByExample(example);
 	}
 
 	@Override
 	public Integer deleteByUserIdAndCategory(SysAccount account) {
 		SysAccountExample example = new SysAccountExample();
-		example.createCriteria().andDeletedEqualTo(false).andIdGreaterThan(new Long(0))
-				.andUserIdEqualTo(account.getUserId()).andCategoryEqualTo(account.getCategory());
+		example.createCriteria().andIdGreaterThan(new Long(0)).andUserIdEqualTo(account.getUserId())
+				.andCategoryEqualTo(account.getCategory());
 		return accountMapper.deleteByExample(example);
 	}
 
@@ -132,10 +127,12 @@ public class SysAccountServiceImpl implements ISysAccountService {
 
 	@Override
 	public ValidResult validCheckBeforeInsert(SysAccount account) {
+		// 格式校验
 		ValidResult preValid = validCheckBeforeInsertOrUpdate(account);
 		if (preValid.hasError()) {
 			return preValid;
 		}
+		// 重复账号判断：账号名+账号类型重复
 		List<SysAccount> duplicateAccountList = listByCategoryAndOpenCode(account);
 		if (duplicateAccountList.size() > 0) {
 			return ValidResult.error("账号重复:" + account.getOpenCode());
@@ -149,13 +146,16 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	 */
 	@Override
 	public ValidResult validCheckBeforeUpdate(SysAccount account) {
+		// 基本格式校验
 		ValidResult preValid = validCheckBeforeInsertOrUpdate(account);
 		if (preValid.hasError()) {
 			return preValid;
 		}
+		// 重复账号判断：其他用户有账号类型+账号名相同的账号，视为重复
 		if (StringUtils.isNotNull(account.getUserId()) && StringUtils.isNotNull(account.getCategory())
 				&& StringUtils.isNotNull(account.getOpenCode())) {
 			SysAccountExample example = new SysAccountExample();
+
 			example.createCriteria().andUserIdNotEqualTo(account.getUserId()).andCategoryEqualTo(account.getCategory())
 					.andOpenCodeEqualTo(account.getOpenCode());
 			List<SysAccount> duplicateAccountList = accountMapper.selectByExample(example);
@@ -174,6 +174,9 @@ public class SysAccountServiceImpl implements ISysAccountService {
 		return ValidResult.success();
 	}
 
+	/**
+	 * 账号格式校验
+	 */
 	@Override
 	public ValidResult validCheckBeforeInsertOrUpdate(SysAccount account) {
 		if (StringUtils.isNull(account) || StringUtils.isNull(account.getCategory())
@@ -219,12 +222,17 @@ public class SysAccountServiceImpl implements ISysAccountService {
 		return ValidResult.success();
 	}
 
+	/**
+	 * 为用户更新账号
+	 */
 	@Override
 	public Integer updateByUser(SysUser user) {
 		List<SysAccount> allAccounts = user.getAllAccounts();
 		Long userId = user.getId();
 		Integer count = 0;
+		// 删除用户所有账号
 		deleteByUserId(userId);
+		// 新增账号
 		for (SysAccount account : allAccounts) {
 			count += insertSelective(account);
 		}

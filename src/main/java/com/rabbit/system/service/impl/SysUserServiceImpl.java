@@ -131,7 +131,6 @@ public class SysUserServiceImpl implements ISysUserService {
 
 	@Override
 	public SysUser selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return userMapper.selectByPrimaryKey(id);
 	}
 
@@ -141,6 +140,7 @@ public class SysUserServiceImpl implements ISysUserService {
 		for (SysAccount account : accountList) {
 			SysUser user = account2User(account);
 			if (StringUtils.isNotNull(user)) {
+				user.setAccount(account);
 				userList.add(user);
 			}
 		}

@@ -6,6 +6,12 @@ import com.rabbit.system.base.BaseService;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptRole;
 
+/**
+ * 部门--角色service
+ * 
+ * @author wlfei
+ *
+ */
 public interface ISysDeptRoleService extends BaseService<SysDeptRole> {
 	/**
 	 * 根据部门ID等值查询

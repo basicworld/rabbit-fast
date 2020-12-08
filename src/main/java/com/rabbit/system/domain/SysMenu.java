@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 菜单
+ * 
+ * @author wlfei
+ *
+ */
 public class SysMenu {
 	private Long id;
 
@@ -39,6 +45,11 @@ public class SysMenu {
 
 	private List<SysMenu> children = new ArrayList<SysMenu>();
 
+	/**
+	 * 子菜单列表
+	 * 
+	 * @return
+	 */
 	public List<SysMenu> getChildren() {
 		return children;
 	}
@@ -47,6 +58,11 @@ public class SysMenu {
 		this.children = children;
 	}
 
+	/**
+	 * 主键
+	 * 
+	 * @return
+	 */
 	public Long getId() {
 		return id;
 	}
@@ -55,6 +71,11 @@ public class SysMenu {
 		this.id = id;
 	}
 
+	/**
+	 * 父ID
+	 * 
+	 * @return
+	 */
 	public Long getParentId() {
 		return parentId;
 	}
@@ -63,6 +84,11 @@ public class SysMenu {
 		this.parentId = parentId;
 	}
 
+	/**
+	 * 菜单名称
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
@@ -71,6 +97,11 @@ public class SysMenu {
 		this.name = name == null ? null : name.trim();
 	}
 
+	/**
+	 * 菜单路由
+	 * 
+	 * @return
+	 */
 	public String getPath() {
 		return path;
 	}
@@ -79,6 +110,11 @@ public class SysMenu {
 		this.path = path == null ? null : path.trim();
 	}
 
+	/**
+	 * 前端组件
+	 * 
+	 * @return
+	 */
 	public String getComponent() {
 		return component;
 	}
@@ -87,6 +123,11 @@ public class SysMenu {
 		this.component = component == null ? null : component.trim();
 	}
 
+	/**
+	 * 排序
+	 * 
+	 * @return
+	 */
 	public Integer getOrderNum() {
 		return orderNum;
 	}
@@ -95,6 +136,11 @@ public class SysMenu {
 		this.orderNum = orderNum;
 	}
 
+	/**
+	 * 是否外链
+	 * 
+	 * @return
+	 */
 	public Boolean getIsFrame() {
 		return isFrame;
 	}
@@ -103,6 +149,11 @@ public class SysMenu {
 		this.isFrame = isFrame;
 	}
 
+	/**
+	 * 菜单可见性
+	 * 
+	 * @return
+	 */
 	public Boolean getVisible() {
 		return visible;
 	}
@@ -111,6 +162,11 @@ public class SysMenu {
 		this.visible = visible;
 	}
 
+	/**
+	 * 状态
+	 * 
+	 * @return
+	 */
 	public Boolean getStatus() {
 		return status;
 	}
@@ -119,6 +175,11 @@ public class SysMenu {
 		this.status = status;
 	}
 
+	/**
+	 * 权限标识
+	 * 
+	 * @return
+	 */
 	public String getPerms() {
 		return perms;
 	}
@@ -127,6 +188,11 @@ public class SysMenu {
 		this.perms = perms == null ? null : perms.trim();
 	}
 
+	/**
+	 * 图标
+	 * 
+	 * @return
+	 */
 	public String getIcon() {
 		return icon;
 	}

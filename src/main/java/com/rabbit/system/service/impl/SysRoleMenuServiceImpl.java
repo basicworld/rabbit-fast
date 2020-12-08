@@ -32,7 +32,6 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return roleMenuMapper.deleteByPrimaryKey(id);
 	}
 
@@ -44,7 +43,6 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 
 	@Override
 	public SysRoleMenu selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return roleMenuMapper.selectByPrimaryKey(id);
 	}
 
@@ -60,16 +58,12 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 		if (StringUtils.isEmpty(roleIds)) {
 			return new ArrayList<SysRoleMenu>();
 		}
-		// 返回值
-		List<SysRoleMenu> roleMenus = new ArrayList<SysRoleMenu>();
 
-		Set<Long> uniqueRoleIds = Stream.of(roleIds).collect(Collectors.toSet());
-		for (Long roleId : uniqueRoleIds) {
-			List<SysRoleMenu> items = listByRoleId(roleId);
-			roleMenus.addAll(items);
-		}
+		List<Long> uniqueRoleIds = Stream.of(roleIds).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+		SysRoleMenuExample example = new SysRoleMenuExample();
+		example.createCriteria().andRoleIdIn(uniqueRoleIds);
+		return roleMenuMapper.selectByExample(example);
 
-		return roleMenus;
 	}
 
 	@Override
@@ -100,8 +94,8 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 				.collect(Collectors.toSet());
 
 		// 数据库待删除 菜单ID
-		Set<Long> menuIdToBeDelete = oldMenuIdSet.stream().filter(v -> !newMenuIdSet.contains(v))
-				.collect(Collectors.toSet());
+		List<Long> menuIdToBeDelete = oldMenuIdSet.stream().filter(v -> !newMenuIdSet.contains(v))
+				.collect(Collectors.toList());
 		Integer count = 0;
 		// 新增
 		for (Long menuId : menuIdToBeInsert) {
@@ -112,11 +106,9 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 		}
 
 		// 删除
-		for (Long menuId : menuIdToBeDelete) {
-			SysRoleMenuExample example = new SysRoleMenuExample();
-			example.createCriteria().andIdGreaterThan(new Long(0)).andMenuIdEqualTo(menuId).andRoleIdEqualTo(roleId);
-			count += roleMenuMapper.deleteByExample(example);
-		}
+		SysRoleMenuExample example = new SysRoleMenuExample();
+		example.createCriteria().andIdGreaterThan(new Long(0)).andMenuIdIn(menuIdToBeDelete).andRoleIdEqualTo(roleId);
+		count += roleMenuMapper.deleteByExample(example);
 		return count;
 	}
 

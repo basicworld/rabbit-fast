@@ -5,6 +5,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 用户
+ * 
+ * @author wlfei
+ *
+ */
 public class SysUser implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -42,6 +48,11 @@ public class SysUser implements Serializable {
 	 */
 	private Long deptId;
 
+	/**
+	 * 用户的所有账号
+	 * 
+	 * @return
+	 */
 	public List<SysAccount> getAllAccounts() {
 		return allAccounts;
 	}
@@ -50,6 +61,11 @@ public class SysUser implements Serializable {
 		this.allAccounts = allAccounts;
 	}
 
+	/**
+	 * 部门主键
+	 * 
+	 * @return
+	 */
 	public Long getDeptId() {
 		return deptId;
 	}
@@ -58,6 +74,11 @@ public class SysUser implements Serializable {
 		this.deptId = deptId;
 	}
 
+	/**
+	 * 角色主键列表
+	 * 
+	 * @return
+	 */
 	public Long[] getRoleIds() {
 		return roleIds;
 	}
@@ -70,6 +91,11 @@ public class SysUser implements Serializable {
 		super();
 	}
 
+	/**
+	 * 当前使用账号
+	 * 
+	 * @return
+	 */
 	public SysAccount getAccount() {
 		return account;
 	}
@@ -78,6 +104,11 @@ public class SysUser implements Serializable {
 		this.account = account;
 	}
 
+	/**
+	 * 主键
+	 * 
+	 * @return
+	 */
 	public Long getId() {
 		return id;
 	}
@@ -86,6 +117,11 @@ public class SysUser implements Serializable {
 		this.id = id;
 	}
 
+	/**
+	 * 用户昵称
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
@@ -94,6 +130,11 @@ public class SysUser implements Serializable {
 		this.name = name == null ? null : name.trim();
 	}
 
+	/**
+	 * 密码盐，已弃用
+	 * 
+	 * @return
+	 */
 	public String getSalt() {
 		return salt;
 	}
@@ -102,6 +143,11 @@ public class SysUser implements Serializable {
 		this.salt = salt == null ? null : salt.trim();
 	}
 
+	/**
+	 * 密码
+	 * 
+	 * @return
+	 */
 	public String getPassword() {
 		return password;
 	}

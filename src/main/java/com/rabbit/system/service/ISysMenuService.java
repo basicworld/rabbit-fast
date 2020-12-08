@@ -7,6 +7,12 @@ import com.rabbit.system.base.BaseService;
 import com.rabbit.system.domain.SysMenu;
 import com.rabbit.system.domain.dto.SysRouter;
 
+/**
+ * 菜单service
+ * 
+ * @author wlfei
+ *
+ */
 public interface ISysMenuService extends BaseService<SysMenu> {
 	/**
 	 * 查询菜单列表
@@ -57,7 +63,8 @@ public interface ISysMenuService extends BaseService<SysMenu> {
 	List<SysMenu> listByPrimaryKeys(Long[] menuIds);
 
 	/**
-	 * 根据用户ID查询菜单
+	 * 根据用户ID查询菜单<br>
+	 * 如果用户是超级管理员，则返回所有菜单
 	 * 
 	 * @param userId
 	 * @return

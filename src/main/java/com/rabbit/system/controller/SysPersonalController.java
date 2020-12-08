@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rabbit.common.constant.ResultConstants;
 import com.rabbit.common.core.text.StrFormatter;
+import com.rabbit.common.util.BCryptUtils;
 import com.rabbit.common.util.RSAUtils;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
@@ -49,10 +49,10 @@ import com.rabbit.system.service.ISysUserService;
 @RequestMapping("/personal")
 public class SysPersonalController {
 	protected final Logger logger = LoggerFactory.getLogger(SysPersonalController.class);
-
+	// 全局rsa公钥
 	@Value("${rsa.publicKey}")
 	private String rsaPublicKey;
-
+	// 全局rsa私钥
 	@Value("${rsa.privateKey}")
 	private String rsaPrivateKey;
 
@@ -74,6 +74,21 @@ public class SysPersonalController {
 	ISysUserRoleService userRoleService;
 
 	/**
+	 * 登出、退出登录
+	 * 
+	 * @param loginBody
+	 * @return
+	 */
+	@PostMapping("/logout")
+	public AjaxResult logout() {
+		logger.debug("user logout");
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		// 删除token
+		tokenService.delLoginUser(loginUser.getToken());
+		return AjaxResult.success();
+	}
+
+	/**
 	 * 登录方法
 	 * 
 	 * @param loginBody 登录信息
@@ -81,6 +96,7 @@ public class SysPersonalController {
 	 */
 	@PostMapping("/login")
 	public AjaxResult login(@RequestBody LoginBody loginBody) {
+		logger.debug("user login");
 		// 验证码处置
 		Captcha cap = new Captcha();
 		cap.setCode(loginBody.getCode());
@@ -105,22 +121,31 @@ public class SysPersonalController {
 	 */
 	@PutMapping("/password")
 	public AjaxResult updatePassword(@RequestBody SysUserDTO userDTO) {
-		logger.debug("普通用户更新密码");
+		logger.debug("user change password");
 		if (StringUtils.isNull(userDTO.getNewPassword()) || StringUtils.isNull(userDTO.getPassword())) {
 			return AjaxResult.error("原密码、新密码不能为空");
 		}
-		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		SysUser user = new SysUser(); // 更新提交用
-		user.setId(loginUser.getUser().getId());
-
+		// 明文 原始密码
 		String oldPassword = RSAUtils.decrypt(rsaPrivateKey, userDTO.getPassword());
+		// 明文 新密码
 		String newPassword = RSAUtils.decrypt(rsaPrivateKey, userDTO.getNewPassword());
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		boolean isOldpasswordValid = encoder.matches(oldPassword, loginUser.getUser().getPassword());
+
+		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+		// 从数据库获取用户密码，解决前端第二次修改密码报错bug
+		SysUser userInDB = userService.selectByPrimaryKey(loginUser.getUser().getId());
+
+		boolean isOldpasswordValid = BCryptUtils.isSamePassword(oldPassword, userInDB.getPassword());
 		if (!isOldpasswordValid) {
 			return AjaxResult.error("原密码错误");
 		}
-		String encodeNewPassword = encoder.encode(newPassword);
+		if (oldPassword.equals(newPassword)) {
+			return AjaxResult.error("新旧密码相同，无需更新");
+		}
+		// 加密后的新密码
+		String encodeNewPassword = BCryptUtils.encode(newPassword);
+		// 根据用户id更新密码
+		SysUser user = new SysUser(); // 更新提交用
+		user.setId(loginUser.getUser().getId());
 		user.setPassword(encodeNewPassword);
 		userService.updateSelective(user);
 		return AjaxResult.success();
@@ -134,7 +159,7 @@ public class SysPersonalController {
 	 */
 	@PutMapping("/info")
 	public AjaxResult updateInfo(@RequestBody SysUserDTO userDTO) {
-		logger.debug("普通用户更新信息");
+		logger.debug("user change userinfo");
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		SysUserDTO updateDTO = new SysUserDTO(); // 更新提交用
 		updateDTO.setUserId(loginUser.getUser().getId());
@@ -145,11 +170,12 @@ public class SysPersonalController {
 		updateDTO.setUsername(loginUser.getUsername());// 用户名不能删除
 		SysUser user = userService.dto2User(updateDTO);
 		logger.info("待更新用户信息：" + user);
-
+		// 校验待更新参数是否合法
 		ValidResult result = userService.validCheckBeforeUpdate(user);
 		if (result.hasError()) {
 			return AjaxResult.error(result.getMessage());
 		}
+		// 更新用户
 		userService.updateSelective(user);
 
 		return AjaxResult.success();
@@ -165,22 +191,24 @@ public class SysPersonalController {
 		logger.debug("普通用户获取用户详情");
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		SysUser user = loginUser.getUser();
-		Long[] roleIds = userRoleService.listByUserId(user.getId()).stream().map(v -> v.getRoleId())
-				.toArray(Long[]::new);
-		Set<String> roles = roleService.listByPrimaryKeys(roleIds).stream().map(v -> v.getCode())
+		// 获取角色CODE
+		Set<String> roles = roleService.listByUserId(user.getId()).stream().map(v -> v.getCode())
 				.collect(Collectors.toSet());
+
 		if (StringUtils.isEmpty(roles)) {
 			String warning = StrFormatter.format("用户ID为{}的角色为空", user.getId());
 			logger.warn(warning);
 			// 添加一个空角色标示，防止前台角色为空时的请求风暴
 			roles.add("__empty__");
 		}
+		// 返回值构造
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("roles", roles);
 		data.put("avatar", "");
 		data.put("introduction", "");
 		// 解决用户部分信息更新时，前台不能及时显示的问题
 		SysUser userInDB = userService.selectByPrimaryKey(user.getId());
+		// 获取用户的所有账号
 		List<SysAccount> accounts = accountService.listByUserId(user.getId());
 		userInDB.setAllAccounts(accounts);
 		SysUserDTO dto = userService.user2dto(userInDB);

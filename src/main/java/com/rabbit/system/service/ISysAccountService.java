@@ -9,7 +9,19 @@ import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
 
+/**
+ * 账号service
+ * 
+ * @author wlfei
+ *
+ */
 public interface ISysAccountService extends BaseService<SysAccount>, ValidCheckService<SysAccount> {
+	/**
+	 * 根据用户主键获取账号列表
+	 * 
+	 * @param userId
+	 * @return
+	 */
 	List<SysAccount> listByUserId(Long userId);
 
 	/**
@@ -60,6 +72,12 @@ public interface ISysAccountService extends BaseService<SysAccount>, ValidCheckS
 	 */
 	Integer deleteByUserIdAndCategory(SysAccount account);
 
+	/**
+	 * 为用户更新账号
+	 * 
+	 * @param user
+	 * @return
+	 */
 	Integer updateByUser(SysUser user);
 
 	/**

@@ -46,7 +46,6 @@ public class SysMenuServiceImpl implements ISysMenuService {
 
 	@Override
 	public Integer deleteByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return menuMapper.deleteByPrimaryKey(id);
 	}
 
@@ -58,7 +57,6 @@ public class SysMenuServiceImpl implements ISysMenuService {
 
 	@Override
 	public SysMenu selectByPrimaryKey(Long id) {
-		// TODO Auto-generated method stub
 		return menuMapper.selectByPrimaryKey(id);
 	}
 
@@ -67,9 +65,13 @@ public class SysMenuServiceImpl implements ISysMenuService {
 		SysMenuExample example = new SysMenuExample();
 		SysMenuExample.Criteria c1 = example.createCriteria();
 		if (StringUtils.isNotNull(menu)) {
+			// 删除标记
 			if (StringUtils.isNull(menu.getDeleted()) || false == menu.getDeleted()) {
 				c1.andDeletedEqualTo(false);
+			} else {
+				c1.andDeletedEqualTo(true);
 			}
+			// 菜单名称
 			if (StringUtils.isNotNull(menu.getName())) {
 				c1.andPathLike(SqlUtil.getFuzzQueryParam(menu.getPath()));
 			}
@@ -126,43 +128,30 @@ public class SysMenuServiceImpl implements ISysMenuService {
 		if (StringUtils.isEmpty(menuIds)) {
 			return new ArrayList<SysMenu>();
 		}
-		Set<Long> uniqueMenuIds = Stream.of(menuIds).collect(Collectors.toSet());
-		List<SysMenu> menus = new ArrayList<SysMenu>();
-		for (Long menuId : uniqueMenuIds) {
-			SysMenu menu = selectByPrimaryKey(menuId);
-			if (StringUtils.isNotNull(menu)) {
-				menus.add(menu);
-			}
-		}
-		return menus;
+		List<Long> uniqueMenuIds = Stream.of(menuIds).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+		SysMenuExample example = new SysMenuExample();
+		example.createCriteria().andIdIn(uniqueMenuIds);
+		return menuMapper.selectByExample(example);
+
 	}
 
 	@Override
 	public List<SysMenu> listByRoleId(Long roleId) {
-		Set<Long> menuIds = roleMenuService.listByRoleId(roleId).stream().map(v -> v.getMenuId())
-				.collect(Collectors.toSet());
-		List<SysMenu> menus = new ArrayList<SysMenu>();
-		for (Long menuId : menuIds) {
-			SysMenu menu = selectByPrimaryKey(menuId);
-			if (StringUtils.isNotNull(menu)) {
-				menus.add(menu);
-			}
-		}
-		return menus;
+		List<Long> menuIds = roleMenuService.listByRoleId(roleId).stream().map(v -> v.getMenuId())
+				.collect(Collectors.toList()).stream().collect(Collectors.toList());
+		SysMenuExample example = new SysMenuExample();
+		example.createCriteria().andIdIn(menuIds);
+		return menuMapper.selectByExample(example);
+
 	}
 
 	@Override
 	public List<SysMenu> listByRoleId(Long[] roleIds) {
-		Set<Long> menuIds = roleMenuService.listByRoleId(roleIds).stream().map(v -> v.getMenuId())
-				.collect(Collectors.toSet());
-		List<SysMenu> menus = new ArrayList<SysMenu>();
-		for (Long menuId : menuIds) {
-			SysMenu menu = selectByPrimaryKey(menuId);
-			if (StringUtils.isNotNull(menu)) {
-				menus.add(menu);
-			}
-		}
-		return menus;
+		List<Long> menuIds = roleMenuService.listByRoleId(roleIds).stream().map(v -> v.getMenuId())
+				.collect(Collectors.toSet()).stream().collect(Collectors.toList());
+		SysMenuExample example = new SysMenuExample();
+		example.createCriteria().andIdIn(menuIds);
+		return menuMapper.selectByExample(example);
 	}
 
 	@Override

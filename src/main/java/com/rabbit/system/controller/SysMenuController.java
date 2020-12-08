@@ -15,6 +15,12 @@ import com.rabbit.framework.web.page.TreeSelect;
 import com.rabbit.system.domain.SysMenu;
 import com.rabbit.system.service.ISysMenuService;
 
+/**
+ * 菜单、路由controller
+ * 
+ * @author wlfei
+ *
+ */
 @RestController
 @RequestMapping("/system/menu")
 public class SysMenuController {
@@ -25,6 +31,12 @@ public class SysMenuController {
 	@Autowired
 	TokenService tokenService;
 
+	/**
+	 * 获取菜单列表
+	 * 
+	 * @param menu
+	 * @return
+	 */
 	@GetMapping("/list")
 	public AjaxResult list(SysMenu menu) {
 
@@ -32,6 +44,12 @@ public class SysMenuController {
 		return AjaxResult.success(menuList);
 	}
 
+	/**
+	 * 获取菜单树
+	 * 
+	 * @param menu
+	 * @return
+	 */
 	@GetMapping("/tree")
 	public AjaxResult treeList(SysMenu menu) {
 
@@ -41,6 +59,12 @@ public class SysMenuController {
 		return AjaxResult.success(treeList);
 	}
 
+	/**
+	 * 获取菜单下拉选择树
+	 * 
+	 * @param menu
+	 * @return
+	 */
 	@GetMapping("/treeselect")
 	public AjaxResult treeSelect(SysMenu menu) {
 		List<SysMenu> menuList = menuService.listByMenu(menu);

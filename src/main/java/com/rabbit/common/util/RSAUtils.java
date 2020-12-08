@@ -27,7 +27,7 @@ import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 /**
- * RSA算法，实现数据的加密解密。
+ * RSA算法工具类，实现数据的加密解密。
  */
 @SuppressWarnings("restriction")
 public class RSAUtils {
