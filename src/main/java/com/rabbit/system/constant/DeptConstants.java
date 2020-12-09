@@ -1,5 +1,11 @@
 package com.rabbit.system.constant;
 
+/**
+ * 部门/机构常量
+ * 
+ * @author wlfei
+ *
+ */
 public class DeptConstants {
 	/**
 	 * 根机构ID

@@ -145,7 +145,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
 		}
 		if (RoleConstants.ADMIN_ROLE_CODE.equals(role.getCode())
 				|| RoleConstants.ADMIN_ROLE_NAME.equals(role.getName())) {
-			return ValidResult.error("超级管理员不允许删除");
+			return ValidResult.error("不允许删除超级管理员");
 		}
 		// 关联用户判断
 		int userRoleCount = userRoleService.listByRoleId(roleId).size();

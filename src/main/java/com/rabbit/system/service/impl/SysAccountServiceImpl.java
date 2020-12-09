@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.sql.SqlUtil;
@@ -42,13 +41,11 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	}
 
 	@Override
-	@Transactional
 	public Integer deleteByPrimaryKey(Long[] accountIds) {
 		Integer count = 0;
 		for (Long accountId : accountIds) {
 			// 删除账号
 			count += accountMapper.deleteByPrimaryKey(accountId);
-
 		}
 		return count;
 	}

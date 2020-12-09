@@ -10,6 +10,9 @@ import java.util.Set;
  *
  */
 public class AccountConstants {
+	/**
+	 * 有效的账号类型set
+	 */
 	public static Set<Integer> VALID_CATEGORY_SET = new HashSet<Integer>() {
 		private static final long serialVersionUID = 1L;
 

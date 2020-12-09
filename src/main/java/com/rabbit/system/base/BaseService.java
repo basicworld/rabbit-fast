@@ -1,5 +1,12 @@
 package com.rabbit.system.base;
 
+/**
+ * service类基本模版，增删改查
+ * 
+ * @author wlfei
+ *
+ * @param <T>
+ */
 public interface BaseService<T> {
 	/**
 	 * 新增

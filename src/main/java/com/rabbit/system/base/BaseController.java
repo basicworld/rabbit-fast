@@ -20,6 +20,12 @@ import com.rabbit.framework.web.page.PageDomain;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.framework.web.page.TableSupport;
 
+/**
+ * 基本controller，包括分页功能
+ * 
+ * @author wlfei
+ *
+ */
 public class BaseController {
 	protected final Logger logger = LoggerFactory.getLogger(BaseController.class);
 

@@ -1,5 +1,11 @@
 package com.rabbit.system.constant;
 
+/**
+ * 菜单常量
+ * 
+ * @author wlfei
+ *
+ */
 public class MenuConstants {
 	/**
 	 * 前端路由component默认配置

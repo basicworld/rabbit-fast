@@ -1,5 +1,11 @@
 package com.rabbit.system.constant;
 
+/**
+ * 角色常量
+ * 
+ * @author wlfei
+ *
+ */
 public class RoleConstants {
 	/**
 	 * 超级管理员的角色ID

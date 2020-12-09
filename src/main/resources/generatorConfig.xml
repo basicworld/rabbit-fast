@@ -40,6 +40,13 @@
 
 		<!--生成对应表及类名 -->
 
+		<table tableName="sys_log" domainObjectName="SysLog" enableCountByExample="false" enableUpdateByExample="true"
+			enableDeleteByExample="true" enableSelectByExample="true" selectByExampleQueryId="false">
+			<property name="my.isgen.usekeys" value="true" />
+			<property name="useActualColumnNames" value="false" />
+			<generatedKey column="id" sqlStatement="JDBC" />
+		</table>
+		<!-- 
 		<table tableName="sys_account" domainObjectName="SysAccount" enableCountByExample="false" enableUpdateByExample="true"
 			enableDeleteByExample="true" enableSelectByExample="true" selectByExampleQueryId="false">
 			<property name="my.isgen.usekeys" value="true" />
@@ -94,6 +101,6 @@
 			<property name="useActualColumnNames" value="false" />
 			<generatedKey column="id" sqlStatement="JDBC" />
 		</table>
-
+ 		-->
 	</context>
 </generatorConfiguration>
