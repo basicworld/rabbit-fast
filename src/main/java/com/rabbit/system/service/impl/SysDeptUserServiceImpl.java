@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rabbit.common.util.BaseUtils;
+import com.rabbit.common.util.StringUtils;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptUser;
 import com.rabbit.system.domain.SysDeptUserExample;
@@ -98,10 +99,13 @@ public class SysDeptUserServiceImpl implements ISysDeptUserService {
 			count += insertSelective(item);
 		}
 		// 删除
-		SysDeptUserExample example = new SysDeptUserExample();
-		example.createCriteria().andDeptIdGreaterThan(new Long(0)).andUserIdIn(userIdToBeDelete)
-				.andDeptIdEqualTo(deptId);
-		count += deptUserMapper.deleteByExample(example);
+		if(StringUtils.isNotEmpty(userIdToBeDelete)) {
+			
+			SysDeptUserExample example = new SysDeptUserExample();
+			example.createCriteria().andDeptIdGreaterThan(new Long(0)).andUserIdIn(userIdToBeDelete)
+					.andDeptIdEqualTo(deptId);
+			count += deptUserMapper.deleteByExample(example);
+		}
 		return count;
 	}
 

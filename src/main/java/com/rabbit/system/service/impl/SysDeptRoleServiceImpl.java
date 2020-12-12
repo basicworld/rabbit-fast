@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rabbit.common.util.StringUtils;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptRole;
 import com.rabbit.system.domain.SysDeptRoleExample;
@@ -117,9 +118,12 @@ public class SysDeptRoleServiceImpl implements ISysDeptRoleService {
 			count += insertSelective(item);
 		}
 		// 删除
-		SysDeptRoleExample example = new SysDeptRoleExample();
-		example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdIn(roleIdsToBeDelete).andDeptIdEqualTo(deptId);
-		count += deptRoleMapper.deleteByExample(example);
+		if (StringUtils.isNotEmpty(roleIdsToBeDelete)) {
+			SysDeptRoleExample example = new SysDeptRoleExample();
+			example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdIn(roleIdsToBeDelete)
+					.andDeptIdEqualTo(deptId);
+			count += deptRoleMapper.deleteByExample(example);
+		}
 		return count;
 	}
 

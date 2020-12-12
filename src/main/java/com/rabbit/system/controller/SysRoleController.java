@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.aspectj.annotation.Log;
 import com.rabbit.framework.security.domain.LoginUser;
 import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
+import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.domain.SysMenu;
 import com.rabbit.system.domain.SysRole;
 import com.rabbit.system.domain.SysRoleMenu;
@@ -44,7 +46,7 @@ import com.rabbit.system.service.ISysUserRoleService;
 @RestController
 @RequestMapping("/system/role")
 public class SysRoleController extends BaseController {
-	protected final Logger logger = LoggerFactory.getLogger(SysRoleController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SysRoleController.class);
 
 	@Autowired
 	ISysRoleService roleService;
@@ -67,8 +69,10 @@ public class SysRoleController extends BaseController {
 	 * @param role
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_ADD_ROLE)
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysRole role) {
+		logger.debug("新增角色...");
 		ValidResult result = roleService.validCheckBeforeInsert(role);
 		if (result.hasError()) {
 			return AjaxResult.error(result.getMessage());
@@ -83,9 +87,10 @@ public class SysRoleController extends BaseController {
 	 * @param roleIds 角色ID列表
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_DEL_ROLE)
 	@DeleteMapping("/{roleIds}")
 	public AjaxResult delete(@PathVariable Long[] roleIds) {
-		logger.debug("执行删除：" + roleIds);
+		logger.debug("删除角色：" + roleIds);
 		// 校验每个角色是否可删除，如果存在不能删除的，则不删除任何角色
 		for (Long roleId : roleIds) {
 			ValidResult result = roleService.validCheckBeforeDelete(roleId);
@@ -106,6 +111,8 @@ public class SysRoleController extends BaseController {
 	 */
 	@GetMapping("/{roleId}")
 	public AjaxResult getDetail(@PathVariable Long roleId) {
+		logger.debug("获取角色详情...");
+
 		SysRole role = roleService.selectByPrimaryKey(roleId);
 
 		if (StringUtils.isNull(role)) {
@@ -132,6 +139,8 @@ public class SysRoleController extends BaseController {
 	 */
 	@GetMapping("/list")
 	public TableDataInfo list(SysRole role) {
+		logger.debug("获取角色列表...");
+
 		startPage();
 		List<SysRole> roleList = roleService.listByRole(role);
 		return getDataTable(roleList);
@@ -143,8 +152,11 @@ public class SysRoleController extends BaseController {
 	 * @param role
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_EDIT_ROLE)
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysRole role) {
+		logger.debug("更新角色...");
+
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		SysUser user = loginUser.getUser();
 		// 当前登录用户的角色set

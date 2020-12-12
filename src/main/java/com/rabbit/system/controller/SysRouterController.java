@@ -28,7 +28,7 @@ import com.rabbit.system.service.ISysMenuService;
 @RequestMapping()
 public class SysRouterController {
 
-	protected final Logger logger = LoggerFactory.getLogger(SysRouterController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SysRouterController.class);
 
 	@Autowired
 	ISysMenuService menuService;

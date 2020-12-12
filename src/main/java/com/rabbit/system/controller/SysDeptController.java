@@ -2,6 +2,8 @@ package com.rabbit.system.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,11 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.aspectj.annotation.Log;
 import com.rabbit.framework.security.domain.LoginUser;
 import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TreeSelect;
 import com.rabbit.system.constant.DeptConstants;
+import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.domain.SysDept;
 import com.rabbit.system.domain.SysDeptRole;
 import com.rabbit.system.service.ISysDeptRoleService;
@@ -37,6 +41,8 @@ import com.rabbit.system.service.ISysUserService;
 @RestController
 @RequestMapping("/system/dept")
 public class SysDeptController {
+	private static final Logger logger = LoggerFactory.getLogger(SysDeptController.class);
+
 	@Autowired
 	ISysDeptService deptService;
 	@Autowired
@@ -57,6 +63,7 @@ public class SysDeptController {
 	 */
 	@GetMapping("/list")
 	public AjaxResult list(SysDept dept) {
+		logger.debug("获取部门列表...");
 		List<SysDept> itemList = deptService.listByDept(dept);
 		return AjaxResult.success(itemList);
 	}
@@ -69,6 +76,8 @@ public class SysDeptController {
 	 */
 	@GetMapping("/{deptId}")
 	public AjaxResult getDetail(@PathVariable Long deptId) {
+		logger.debug("获取部门详情...");
+
 		SysDept dept = deptService.selectByPrimaryKey(deptId);
 		if (StringUtils.isNull(dept)) {
 			return AjaxResult.error("部门不存在");
@@ -87,6 +96,8 @@ public class SysDeptController {
 	 */
 	@GetMapping("/tree")
 	public AjaxResult treeList(SysDept dept) {
+		logger.debug("获取部门树...");
+
 		List<SysDept> itemList = deptService.listByDept(dept);
 		List<SysDept> treeList = deptService.buildDeptTree(itemList);
 		return AjaxResult.success(treeList);
@@ -100,6 +111,8 @@ public class SysDeptController {
 	 */
 	@GetMapping("/treeselect")
 	public AjaxResult treeSelect(SysDept dept) {
+		logger.debug("获取部门下拉树...");
+
 		List<SysDept> itemList = deptService.listByDept(dept);
 		List<TreeSelect> treeSelect = deptService.buildDeptTreeSelect(itemList);
 		return AjaxResult.success(treeSelect);
@@ -112,8 +125,11 @@ public class SysDeptController {
 	 * @param dept
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_ADD_DEPT)
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysDept dept) {
+		logger.debug("新增部门...");
+
 		// 登录用户非管理员的，不能创建包含管理员角色的部门
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
@@ -141,8 +157,11 @@ public class SysDeptController {
 	 * @param deptId
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_DEL_DEPT)
 	@DeleteMapping("/{deptId}")
 	public AjaxResult delete(@PathVariable Long deptId) {
+		logger.debug("删除部门...");
+
 		// 登录用户非管理员的，不能删除包含管理员角色的部门
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
@@ -167,8 +186,11 @@ public class SysDeptController {
 	 * @param dept
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_EDIT_DEPT)
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysDept dept) {
+		logger.debug("更新部门...");
+
 		// 登录用户非管理员的，不能更新包含管理员角色的部门，不能给部门添加管理员角色
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());

@@ -24,11 +24,13 @@ import com.rabbit.common.util.RSAUtils;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.aspectj.annotation.Log;
 import com.rabbit.framework.security.domain.LoginBody;
 import com.rabbit.framework.security.domain.LoginUser;
 import com.rabbit.framework.security.service.SysLoginService;
 import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
+import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.domain.Captcha;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
@@ -48,7 +50,7 @@ import com.rabbit.system.service.ISysUserService;
 @RestController
 @RequestMapping("/personal")
 public class SysPersonalController {
-	protected final Logger logger = LoggerFactory.getLogger(SysPersonalController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SysPersonalController.class);
 	// 全局rsa公钥
 	@Value("${rsa.publicKey}")
 	private String rsaPublicKey;
@@ -74,21 +76,6 @@ public class SysPersonalController {
 	ISysUserRoleService userRoleService;
 
 	/**
-	 * 登出、退出登录
-	 * 
-	 * @param loginBody
-	 * @return
-	 */
-	@PostMapping("/logout")
-	public AjaxResult logout() {
-		logger.debug("user logout");
-		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		// 删除token
-		tokenService.delLoginUser(loginUser.getToken());
-		return AjaxResult.success();
-	}
-
-	/**
 	 * 登录方法
 	 * 
 	 * @param loginBody 登录信息
@@ -96,7 +83,7 @@ public class SysPersonalController {
 	 */
 	@PostMapping("/login")
 	public AjaxResult login(@RequestBody LoginBody loginBody) {
-		logger.debug("user login");
+		logger.debug("user login...");
 		// 验证码处置
 		Captcha cap = new Captcha();
 		cap.setCode(loginBody.getCode());
@@ -110,7 +97,7 @@ public class SysPersonalController {
 		loginBody.setPassword(password);
 		logger.debug("用户登录，参数：" + loginBody);
 		String token = loginService.login(loginBody.getUsername(), loginBody.getPassword());
-		return new AjaxResult(ResultConstants.CODE_SUCCESS, ResultConstants.MESSAGE_SUCCESS, token);
+		return AjaxResult.success(ResultConstants.MESSAGE_SUCCESS, token);
 	}
 
 	/**
@@ -119,9 +106,10 @@ public class SysPersonalController {
 	 * @param userDTO
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_CHANGE_PWD, isSaveRequestData = false)
 	@PutMapping("/password")
 	public AjaxResult updatePassword(@RequestBody SysUserDTO userDTO) {
-		logger.debug("user change password");
+		logger.debug("user change password...");
 		if (StringUtils.isNull(userDTO.getNewPassword()) || StringUtils.isNull(userDTO.getPassword())) {
 			return AjaxResult.error("原密码、新密码不能为空");
 		}
@@ -157,9 +145,10 @@ public class SysPersonalController {
 	 * @param userDTO
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_CHANGE_INFO)
 	@PutMapping("/info")
 	public AjaxResult updateInfo(@RequestBody SysUserDTO userDTO) {
-		logger.debug("user change userinfo");
+		logger.debug("user change userinfo...");
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		SysUserDTO updateDTO = new SysUserDTO(); // 更新提交用
 		updateDTO.setUserId(loginUser.getUser().getId());
@@ -176,6 +165,7 @@ public class SysPersonalController {
 			return AjaxResult.error(result.getMessage());
 		}
 		// 更新用户
+		user.setPassword(null);
 		userService.updateSelective(user);
 
 		return AjaxResult.success();
@@ -188,7 +178,7 @@ public class SysPersonalController {
 	 */
 	@GetMapping("/info")
 	public AjaxResult getInfo() {
-		logger.debug("普通用户获取用户详情");
+		logger.debug("普通用户获取用户详情...");
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		SysUser user = loginUser.getUser();
 		// 获取角色CODE

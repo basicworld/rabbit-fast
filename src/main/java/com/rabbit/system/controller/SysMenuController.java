@@ -24,7 +24,7 @@ import com.rabbit.system.service.ISysMenuService;
 @RestController
 @RequestMapping("/system/menu")
 public class SysMenuController {
-	protected final Logger logger = LoggerFactory.getLogger(SysMenuController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SysMenuController.class);
 
 	@Autowired
 	ISysMenuService menuService;
@@ -39,7 +39,7 @@ public class SysMenuController {
 	 */
 	@GetMapping("/list")
 	public AjaxResult list(SysMenu menu) {
-
+		logger.debug("获取菜单列表...");
 		List<SysMenu> menuList = menuService.listByMenu(menu);
 		return AjaxResult.success(menuList);
 	}
@@ -52,6 +52,7 @@ public class SysMenuController {
 	 */
 	@GetMapping("/tree")
 	public AjaxResult treeList(SysMenu menu) {
+		logger.debug("获取菜单树...");
 
 		List<SysMenu> menuList = menuService.listByMenu(menu);
 
@@ -67,6 +68,8 @@ public class SysMenuController {
 	 */
 	@GetMapping("/treeselect")
 	public AjaxResult treeSelect(SysMenu menu) {
+		logger.debug("获取菜单下拉树...");
+
 		List<SysMenu> menuList = menuService.listByMenu(menu);
 		List<TreeSelect> treeSelect = menuService.buildMenuTreeSelect(menuList);
 		return AjaxResult.success(treeSelect);

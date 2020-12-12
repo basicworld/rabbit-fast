@@ -24,11 +24,13 @@ import com.rabbit.common.util.SecurityUtils;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
+import com.rabbit.framework.aspectj.annotation.Log;
 import com.rabbit.framework.security.domain.LoginUser;
 import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
+import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
@@ -48,7 +50,7 @@ import com.rabbit.system.service.ISysUserService;
 @RestController
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController {
-	protected final Logger logger = LoggerFactory.getLogger(SysUserController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SysUserController.class);
 	@Autowired
 	ISysUserService userService;
 	@Autowired
@@ -80,6 +82,7 @@ public class SysUserController extends BaseController {
 	 */
 	@GetMapping("/list")
 	public TableDataInfo list(SysUserDTO userDTO) {
+		logger.debug("获取用户列表...");
 		startPage();
 		List<SysUser> userList = userService.listByUserDTO(userDTO);
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -104,8 +107,11 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_ADD_USER)
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysUserDTO userDTO) {
+		logger.debug("新增用户...");
+
 		// 非管理员不能创建管理员账号
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
@@ -147,6 +153,8 @@ public class SysUserController extends BaseController {
 	 */
 	@GetMapping("/{userId}")
 	public AjaxResult getDetail(@PathVariable Long userId) {
+		logger.debug("获取用户详情...");
+
 		SysUser user = userService.selectByPrimaryKey(userId);
 		if (StringUtils.isNull(user)) {
 			return AjaxResult.error("用户不存在");
@@ -170,8 +178,11 @@ public class SysUserController extends BaseController {
 	 * @param userId
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_DEL_USER)
 	@DeleteMapping("/{userIds}")
 	public AjaxResult delete(@PathVariable Long[] userIds) {
+		logger.debug("删除用户...");
+
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
 		boolean loginUserNotAdmin = userService.isNotAdmin(loginUser.getUser().getId());
 		// 删除前校验，一个不通过的，不允许删除
@@ -202,6 +213,7 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_EDIT_USER)
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysUserDTO userDTO) {
 		logger.debug("更新用户，ID=" + userDTO.getUserId());
@@ -243,6 +255,7 @@ public class SysUserController extends BaseController {
 		if (checkResult.hasError()) {
 			return AjaxResult.error(checkResult.getMessage());
 		}
+		user.setPassword(null);
 		userService.updateSelective(user);
 		return AjaxResult.success();
 	}
@@ -253,8 +266,11 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_RESET_PWD)
 	@PutMapping("/resetPassword")
 	public AjaxResult resetPassword(@RequestBody SysUserDTO userDTO) {
+		logger.debug("重置用户密码...");
+
 		if (StringUtils.isNull(userDTO.getUserId()) || StringUtils.isNull(userDTO.getPassword())) {
 			return AjaxResult.error("用户ID或密码为空");
 		}

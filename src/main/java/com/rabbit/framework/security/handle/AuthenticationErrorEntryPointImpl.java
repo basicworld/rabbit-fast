@@ -30,7 +30,7 @@ public class AuthenticationErrorEntryPointImpl implements AuthenticationEntryPoi
 			throws IOException {
 		// 返回认证失败
 		int code = ResultConstants.CODE_AUTH_FAIL;
-		String msg = StringUtils.format("请求访问：{}，认证失败，无法访问系统资源", request.getRequestURI());
+		String msg = StringUtils.format("认证失败，无法访问资源{}", request.getRequestURI());
 		ServletUtils.renderString(response, JSON.toJSONString(AjaxResult.error(code, msg)));
 	}
 }
