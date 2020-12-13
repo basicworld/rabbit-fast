@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rabbit.common.util.StringUtils;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.SysUserRole;
 import com.rabbit.system.domain.SysUserRoleExample;
@@ -98,11 +99,13 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
 			item.setUserId(user.getId());
 			count += insertSelective(item);
 		}
+		if (StringUtils.isNotEmpty(roleIdToBeDelete)) {
+			SysUserRoleExample example = new SysUserRoleExample();
+			example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdIn(roleIdToBeDelete)
+					.andUserIdEqualTo(user.getId());
+			count += userRoleMapper.deleteByExample(example);
 
-		SysUserRoleExample example = new SysUserRoleExample();
-		example.createCriteria().andIdGreaterThan(new Long(0)).andRoleIdIn(roleIdToBeDelete)
-				.andUserIdEqualTo(user.getId());
-		count += userRoleMapper.deleteByExample(example);
+		}
 		return count;
 	}
 

@@ -106,9 +106,13 @@ public class SysRoleMenuServiceImpl implements ISysRoleMenuService {
 		}
 
 		// 删除
-		SysRoleMenuExample example = new SysRoleMenuExample();
-		example.createCriteria().andIdGreaterThan(new Long(0)).andMenuIdIn(menuIdToBeDelete).andRoleIdEqualTo(roleId);
-		count += roleMenuMapper.deleteByExample(example);
+		if (StringUtils.isNotEmpty(menuIdToBeDelete)) {
+			SysRoleMenuExample example = new SysRoleMenuExample();
+			example.createCriteria().andIdGreaterThan(new Long(0)).andMenuIdIn(menuIdToBeDelete)
+					.andRoleIdEqualTo(roleId);
+			count += roleMenuMapper.deleteByExample(example);
+
+		}
 		return count;
 	}
 

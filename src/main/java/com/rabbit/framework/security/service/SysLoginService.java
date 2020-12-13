@@ -64,7 +64,7 @@ public class SysLoginService {
 		logger.debug("loginUser.user:" + loginUser.getUser());
 		String token = tokenService.createToken(loginUser);
 		AsyncManager.me().execute(AsyncFactory.recordLoginLog(LogConstants.TYPE_LOGIN, loginUser.getUser().getId(),
-				username, true, "登录成功", JSON.toJSONString(AjaxResult.success(ResultConstants.MESSAGE_SUCCESS, token))));
+				username, true, "登录成功", JSON.toJSONString(AjaxResult.success())));
 		logger.debug("login success...");
 		return token;
 	}

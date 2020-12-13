@@ -266,7 +266,7 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
-	@Log(operateType = LogConstants.TYPE_RESET_PWD)
+	@Log(operateType = LogConstants.TYPE_RESET_PWD, isSaveRequestData = false)
 	@PutMapping("/resetPassword")
 	public AjaxResult resetPassword(@RequestBody SysUserDTO userDTO) {
 		logger.debug("重置用户密码...");
