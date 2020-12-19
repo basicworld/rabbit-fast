@@ -14,7 +14,7 @@ import org.mybatis.generator.internal.DefaultShellCallback;
 public class MybatisGenerator {
 
 	public static void main(String[] args) throws Exception {
-		String today = "2020-12-12";
+		String today = "2020-12-19";
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date now = sdf.parse(today);
