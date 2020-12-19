@@ -22,7 +22,7 @@ import com.rabbit.system.constant.RoleConstants;
 public class PermissionService {
 	public static Log logger = LogFactory.getLog(PermissionService.class);
 	/** 所有权限标识 */
-	private static final String ALL_PERMISSION = "*:*:*";
+	private static final String ALL_PERMISSION = "*:*";
 
 	/** 管理员角色权限标识 */
 	private static final String SUPER_ADMIN = RoleConstants.ADMIN_ROLE_CODE;
@@ -45,7 +45,14 @@ public class PermissionService {
 			return false;
 		}
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions())) {
+		if (StringUtils.isNull(loginUser)) {
+			return false;
+		}
+		// 超级管理员具有所有权限
+		if (isUserAdmin(loginUser)) {
+			return true;
+		}
+		if (CollectionUtils.isEmpty(loginUser.getPermissions())) {
 			return false;
 		}
 		return hasPermissions(loginUser.getPermissions(), permission);
@@ -72,7 +79,14 @@ public class PermissionService {
 			return false;
 		}
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions())) {
+		if (StringUtils.isNull(loginUser)) {
+			return false;
+		}
+		// 超级管理员具有所有权限
+		if (isUserAdmin(loginUser)) {
+			return true;
+		}
+		if (CollectionUtils.isEmpty(loginUser.getPermissions())) {
 			return false;
 		}
 		Set<String> authorities = loginUser.getPermissions();
@@ -95,11 +109,18 @@ public class PermissionService {
 			return false;
 		}
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getRoles())) {
+		if (StringUtils.isNull(loginUser)) {
+			return false;
+		}
+		// 超级管理员具有所有权限
+		if (isUserAdmin(loginUser)) {
+			return true;
+		}
+		if (CollectionUtils.isEmpty(loginUser.getRoles())) {
 			return false;
 		}
 		for (String roleCode : loginUser.getRoles()) {
-			if (SUPER_ADMIN.contains(roleCode) || roleCode.equals(StringUtils.trim(role))) {
+			if (roleCode.equals(StringUtils.trim(role))) {
 				return true;
 			}
 		}
@@ -127,7 +148,14 @@ public class PermissionService {
 			return false;
 		}
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-		if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getRoles())) {
+		if (StringUtils.isNull(loginUser)) {
+			return false;
+		}
+		// 超级管理员具有所有权限
+		if (isUserAdmin(loginUser)) {
+			return true;
+		}
+		if (CollectionUtils.isEmpty(loginUser.getRoles())) {
 			return false;
 		}
 		for (String role : roles.split(ROLE_DELIMETER)) {
@@ -147,6 +175,23 @@ public class PermissionService {
 	 */
 	private boolean hasPermissions(Set<String> permissions, String permission) {
 		return permissions.contains(ALL_PERMISSION) || permissions.contains(StringUtils.trim(permission));
+	}
+
+	/**
+	 * 判断用书是否为超级管理员
+	 * 
+	 */
+	private boolean isUserAdmin(LoginUser loginUser) {
+		if (StringUtils.isEmpty(loginUser.getRoles())) {
+			return false;
+		}
+		for (String roleCode : loginUser.getRoles()) {
+			if (SUPER_ADMIN.contains(roleCode)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

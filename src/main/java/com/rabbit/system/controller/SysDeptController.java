@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -125,6 +126,7 @@ public class SysDeptController {
 	 * @param dept
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:dept')")
 	@Log(operateType = LogConstants.TYPE_ADD_DEPT)
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysDept dept) {
@@ -157,6 +159,7 @@ public class SysDeptController {
 	 * @param deptId
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:dept')")
 	@Log(operateType = LogConstants.TYPE_DEL_DEPT)
 	@DeleteMapping("/{deptId}")
 	public AjaxResult delete(@PathVariable Long deptId) {
@@ -186,6 +189,7 @@ public class SysDeptController {
 	 * @param dept
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:dept')")
 	@Log(operateType = LogConstants.TYPE_EDIT_DEPT)
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysDept dept) {

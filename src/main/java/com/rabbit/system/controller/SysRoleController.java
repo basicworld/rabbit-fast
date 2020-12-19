@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +70,7 @@ public class SysRoleController extends BaseController {
 	 * @param role
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:role')")
 	@Log(operateType = LogConstants.TYPE_ADD_ROLE)
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysRole role) {
@@ -87,6 +89,7 @@ public class SysRoleController extends BaseController {
 	 * @param roleIds 角色ID列表
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:role')")
 	@Log(operateType = LogConstants.TYPE_DEL_ROLE)
 	@DeleteMapping("/{roleIds}")
 	public AjaxResult delete(@PathVariable Long[] roleIds) {
@@ -152,6 +155,7 @@ public class SysRoleController extends BaseController {
 	 * @param role
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:role')")
 	@Log(operateType = LogConstants.TYPE_EDIT_ROLE)
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysRole role) {

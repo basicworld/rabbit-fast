@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +108,7 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:user')")
 	@Log(operateType = LogConstants.TYPE_ADD_USER)
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysUserDTO userDTO) {
@@ -178,6 +180,7 @@ public class SysUserController extends BaseController {
 	 * @param userId
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:user')")
 	@Log(operateType = LogConstants.TYPE_DEL_USER)
 	@DeleteMapping("/{userIds}")
 	public AjaxResult delete(@PathVariable Long[] userIds) {
@@ -213,6 +216,7 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:user')")
 	@Log(operateType = LogConstants.TYPE_EDIT_USER)
 	@PutMapping
 	public AjaxResult update(@Validated @RequestBody SysUserDTO userDTO) {
@@ -266,6 +270,7 @@ public class SysUserController extends BaseController {
 	 * @param userDTO
 	 * @return
 	 */
+	@PreAuthorize("@ss.hasPermi('system:user')")
 	@Log(operateType = LogConstants.TYPE_RESET_PWD, isSaveRequestData = false)
 	@PutMapping("/resetPassword")
 	public AjaxResult resetPassword(@RequestBody SysUserDTO userDTO) {
