@@ -26,12 +26,15 @@ import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidResult;
 import com.rabbit.framework.aspectj.annotation.Log;
+import com.rabbit.framework.manager.AsyncManager;
+import com.rabbit.framework.manager.factory.AsyncFactory;
 import com.rabbit.framework.security.domain.LoginUser;
 import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
 import com.rabbit.system.constant.LogConstants;
+import com.rabbit.system.constant.MailConstants;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
@@ -144,6 +147,12 @@ public class SysUserController extends BaseController {
 			return AjaxResult.error(checkResult.getMessage());
 		}
 		userService.insertSelective(user);
+		// 创建用户成功，尝试发送邮件通知
+		if (StringUtils.isNotNull(userDTO.getEmail())) {
+			String emailContent = StringUtils.format(MailConstants.CONTENT_OF_USER_REGIST_SUCCESS, userDTO.getEmail());
+			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(),
+					MailConstants.SUBJECT_OF_USER_REGIST_SUCCESS, emailContent));
+		}
 		return AjaxResult.success("创建成功，默认密码：" + DEFAULT_RAW_PASSWORD);
 	}
 

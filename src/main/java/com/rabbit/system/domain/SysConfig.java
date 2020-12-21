@@ -13,6 +13,8 @@ public class SysConfig {
 
     private Boolean systemBuilt;
 
+    private Date createTime;
+
     private String createBy;
 
     private Date updateTime;
@@ -59,6 +61,14 @@ public class SysConfig {
 
     public void setSystemBuilt(Boolean systemBuilt) {
         this.systemBuilt = systemBuilt;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     public String getCreateBy() {

@@ -25,4 +25,14 @@ public class IMailServiceTest {
 		mailService.sendSimpleMail(to, subject, content);
 	}
 
+	@Test
+	public void testReloadRedisCacheAndSendSimpleMail() {
+		mailService.reloadMailConfigFromCache();
+		String to = "basicworld@163.com";
+		String subject = "嫦娥5号的祝福reload";
+		String content = "你好中国，我是嫦娥5号，时间：" + new Date().toString();
+
+		mailService.sendSimpleMail(to, subject, content);
+	}
+
 }

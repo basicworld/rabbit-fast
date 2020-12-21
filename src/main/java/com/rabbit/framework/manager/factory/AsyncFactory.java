@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import com.rabbit.common.util.spring.SpringUtils;
 import com.rabbit.system.monitor.domain.SysLog;
 import com.rabbit.system.monitor.service.ISysLogService;
+import com.rabbit.system.service.IMailService;
 
 /**
  * 异步工厂
@@ -55,6 +56,24 @@ public class AsyncFactory {
 			@Override
 			public void run() {
 				SpringUtils.getBean(ISysLogService.class).insertSelective(sysLog);
+			}
+		};
+	}
+
+	/**
+	 * 发送邮件
+	 * 
+	 * @param to
+	 * @param subject
+	 * @param content
+	 * @return
+	 */
+	public static TimerTask sendSimpleMail(final String to, final String subject, final String content) {
+		return new TimerTask() {
+
+			@Override
+			public void run() {
+				SpringUtils.getBean(IMailService.class).sendSimpleMail(to, subject, content);
 			}
 		};
 	}

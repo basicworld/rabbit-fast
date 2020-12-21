@@ -2,11 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rabbit.system.mapper.SysConfigMapper">
   <resultMap id="BaseResultMap" type="com.rabbit.system.domain.SysConfig">
-    <result column="id" jdbcType="BIGINT" property="id" />
+    <id column="id" jdbcType="BIGINT" property="id" />
     <result column="cname" jdbcType="VARCHAR" property="cname" />
     <result column="ckey" jdbcType="VARCHAR" property="ckey" />
     <result column="cvalue" jdbcType="VARCHAR" property="cvalue" />
     <result column="system_built" jdbcType="BIT" property="systemBuilt" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="create_by" jdbcType="VARCHAR" property="createBy" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
@@ -71,7 +72,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, cname, ckey, cvalue, system_built, create_by, update_time, update_by, deleted
+    id, cname, ckey, cvalue, system_built, create_time, create_by, update_time, update_by, 
+    deleted
   </sql>
   <select id="selectByExample" parameterType="com.rabbit.system.domain.SysConfigExample" resultMap="BaseResultMap">
     select
@@ -88,6 +90,16 @@
       order by ${orderByClause}
     </if>
   </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from sys_config
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from sys_config
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
   <delete id="deleteByExample" parameterType="com.rabbit.system.domain.SysConfigExample">
     delete from sys_config
     <if test="_parameter != null">
@@ -96,11 +108,13 @@
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.rabbit.system.domain.SysConfig" useGeneratedKeys="true">
     insert into sys_config (cname, ckey, cvalue, 
-      system_built, create_by, update_time, 
-      update_by, deleted)
+      system_built, create_time, create_by, 
+      update_time, update_by, deleted
+      )
     values (#{cname,jdbcType=VARCHAR}, #{ckey,jdbcType=VARCHAR}, #{cvalue,jdbcType=VARCHAR}, 
-      #{systemBuilt,jdbcType=BIT}, #{createBy,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{updateBy,jdbcType=VARCHAR}, #{deleted,jdbcType=BIT})
+      #{systemBuilt,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{deleted,jdbcType=BIT}
+      )
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.rabbit.system.domain.SysConfig" useGeneratedKeys="true">
     insert into sys_config
@@ -116,6 +130,9 @@
       </if>
       <if test="systemBuilt != null">
         system_built,
+      </if>
+      <if test="createTime != null">
+        create_time,
       </if>
       <if test="createBy != null">
         create_by,
@@ -142,6 +159,9 @@
       </if>
       <if test="systemBuilt != null">
         #{systemBuilt,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
       </if>
       <if test="createBy != null">
         #{createBy,jdbcType=VARCHAR},
@@ -175,6 +195,9 @@
       <if test="record.systemBuilt != null">
         system_built = #{record.systemBuilt,jdbcType=BIT},
       </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
       <if test="record.createBy != null">
         create_by = #{record.createBy,jdbcType=VARCHAR},
       </if>
@@ -199,6 +222,7 @@
       ckey = #{record.ckey,jdbcType=VARCHAR},
       cvalue = #{record.cvalue,jdbcType=VARCHAR},
       system_built = #{record.systemBuilt,jdbcType=BIT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
       create_by = #{record.createBy,jdbcType=VARCHAR},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
       update_by = #{record.updateBy,jdbcType=VARCHAR},
@@ -206,5 +230,51 @@
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.rabbit.system.domain.SysConfig">
+    update sys_config
+    <set>
+      <if test="cname != null">
+        cname = #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="ckey != null">
+        ckey = #{ckey,jdbcType=VARCHAR},
+      </if>
+      <if test="cvalue != null">
+        cvalue = #{cvalue,jdbcType=VARCHAR},
+      </if>
+      <if test="systemBuilt != null">
+        system_built = #{systemBuilt,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null">
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="deleted != null">
+        deleted = #{deleted,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.rabbit.system.domain.SysConfig">
+    update sys_config
+    set cname = #{cname,jdbcType=VARCHAR},
+      ckey = #{ckey,jdbcType=VARCHAR},
+      cvalue = #{cvalue,jdbcType=VARCHAR},
+      system_built = #{systemBuilt,jdbcType=BIT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      deleted = #{deleted,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>
