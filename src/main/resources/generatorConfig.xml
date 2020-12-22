@@ -44,12 +44,12 @@
 		<!--生成对应表及类名 -->
 		
 		<!-- 一个有意思的异常：本表与sys.sys_config表同名，造成了无法识别本表主键问题 -->
-		<!-- <table tableName="sys_config" domainObjectName="SysConfig" enableCountByExample="false" enableUpdateByExample="true"
+		<table tableName="sys_config" domainObjectName="SysConfig" enableCountByExample="false" enableUpdateByExample="true"
 			enableDeleteByExample="true" enableSelectByExample="true" selectByExampleQueryId="false">
 			<property name="my.isgen.usekeys" value="true" />
 			<property name="useActualColumnNames" value="false" />
 			<generatedKey column="id" sqlStatement="JDBC" />
-		</table>-->
+		</table>
 		<!--  <table tableName="sys_log" domainObjectName="SysLog" enableCountByExample="false" enableUpdateByExample="true"
 			enableDeleteByExample="true" enableSelectByExample="true" selectByExampleQueryId="false">
 			<property name="my.isgen.usekeys" value="true" />

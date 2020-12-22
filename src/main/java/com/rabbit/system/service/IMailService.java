@@ -10,6 +10,13 @@ import com.rabbit.common.util.valid.ValidResult;
  */
 public interface IMailService {
 	/**
+	 * 确认是否可以发邮件
+	 * 
+	 * @return
+	 */
+	Boolean canSendMail();
+
+	/**
 	 * 使用缓存配置，更新邮箱配置参数和邮箱连接<br>
 	 * 一般用于动态修改smtp相关参数
 	 * 

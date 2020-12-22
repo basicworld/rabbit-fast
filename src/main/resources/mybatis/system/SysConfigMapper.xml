@@ -6,6 +6,7 @@
     <result column="cname" jdbcType="VARCHAR" property="cname" />
     <result column="ckey" jdbcType="VARCHAR" property="ckey" />
     <result column="cvalue" jdbcType="VARCHAR" property="cvalue" />
+    <result column="ctype" jdbcType="VARCHAR" property="ctype" />
     <result column="system_built" jdbcType="BIT" property="systemBuilt" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="create_by" jdbcType="VARCHAR" property="createBy" />
@@ -72,8 +73,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, cname, ckey, cvalue, system_built, create_time, create_by, update_time, update_by, 
-    deleted
+    id, cname, ckey, cvalue, ctype, system_built, create_time, create_by, update_time, 
+    update_by, deleted
   </sql>
   <select id="selectByExample" parameterType="com.rabbit.system.domain.SysConfigExample" resultMap="BaseResultMap">
     select
@@ -108,13 +109,13 @@
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.rabbit.system.domain.SysConfig" useGeneratedKeys="true">
     insert into sys_config (cname, ckey, cvalue, 
-      system_built, create_time, create_by, 
-      update_time, update_by, deleted
-      )
+      ctype, system_built, create_time, 
+      create_by, update_time, update_by, 
+      deleted)
     values (#{cname,jdbcType=VARCHAR}, #{ckey,jdbcType=VARCHAR}, #{cvalue,jdbcType=VARCHAR}, 
-      #{systemBuilt,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=VARCHAR}, 
-      #{updateTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{deleted,jdbcType=BIT}
-      )
+      #{ctype,jdbcType=VARCHAR}, #{systemBuilt,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{createBy,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
+      #{deleted,jdbcType=BIT})
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.rabbit.system.domain.SysConfig" useGeneratedKeys="true">
     insert into sys_config
@@ -127,6 +128,9 @@
       </if>
       <if test="cvalue != null">
         cvalue,
+      </if>
+      <if test="ctype != null">
+        ctype,
       </if>
       <if test="systemBuilt != null">
         system_built,
@@ -156,6 +160,9 @@
       </if>
       <if test="cvalue != null">
         #{cvalue,jdbcType=VARCHAR},
+      </if>
+      <if test="ctype != null">
+        #{ctype,jdbcType=VARCHAR},
       </if>
       <if test="systemBuilt != null">
         #{systemBuilt,jdbcType=BIT},
@@ -192,6 +199,9 @@
       <if test="record.cvalue != null">
         cvalue = #{record.cvalue,jdbcType=VARCHAR},
       </if>
+      <if test="record.ctype != null">
+        ctype = #{record.ctype,jdbcType=VARCHAR},
+      </if>
       <if test="record.systemBuilt != null">
         system_built = #{record.systemBuilt,jdbcType=BIT},
       </if>
@@ -221,6 +231,7 @@
       cname = #{record.cname,jdbcType=VARCHAR},
       ckey = #{record.ckey,jdbcType=VARCHAR},
       cvalue = #{record.cvalue,jdbcType=VARCHAR},
+      ctype = #{record.ctype,jdbcType=VARCHAR},
       system_built = #{record.systemBuilt,jdbcType=BIT},
       create_time = #{record.createTime,jdbcType=TIMESTAMP},
       create_by = #{record.createBy,jdbcType=VARCHAR},
@@ -242,6 +253,9 @@
       </if>
       <if test="cvalue != null">
         cvalue = #{cvalue,jdbcType=VARCHAR},
+      </if>
+      <if test="ctype != null">
+        ctype = #{ctype,jdbcType=VARCHAR},
       </if>
       <if test="systemBuilt != null">
         system_built = #{systemBuilt,jdbcType=BIT},
@@ -269,6 +283,7 @@
     set cname = #{cname,jdbcType=VARCHAR},
       ckey = #{ckey,jdbcType=VARCHAR},
       cvalue = #{cvalue,jdbcType=VARCHAR},
+      ctype = #{ctype,jdbcType=VARCHAR},
       system_built = #{systemBuilt,jdbcType=BIT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       create_by = #{createBy,jdbcType=VARCHAR},

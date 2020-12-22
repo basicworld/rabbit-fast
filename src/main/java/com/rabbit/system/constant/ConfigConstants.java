@@ -7,6 +7,9 @@ package com.rabbit.system.constant;
  *
  */
 public class ConfigConstants {
+	public static final String STRING_TRUE = "true";
+	public static final String STRING_FALSE = "false";
+
 	/** name of PropertiesPropertySource */
 	public static final String NAME_OF_DB_PROPERTY_SOURCE = "system-config";
 	/** SMTP 配置键名：邮箱服务器 */
@@ -21,5 +24,7 @@ public class ConfigConstants {
 	public static final String KEY_OF_MAIL_SMTP_PASSWORD = "spring.mail.password";
 	/** SMTP 配置键名：邮箱发信人昵称 */
 	public static final String KEY_OF_MAIL_SMTP_FROM = "spring.mail.from";
+	/** SMTP 配置键名：开启发邮件功能 */
+	public static final String KEY_OF_MAIL_OPEN = "my.mail.smtp.open";
 
 }

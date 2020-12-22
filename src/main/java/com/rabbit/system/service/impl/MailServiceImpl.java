@@ -30,6 +30,10 @@ public class MailServiceImpl implements IMailService {
 
 	@Override
 	public ValidResult sendSimpleMail(String to, String subject, String content) {
+		if(!canSendMail()) {
+			logger.warn("未开启邮件发送功能！");
+			return ValidResult.error("未开启邮件发送功能！");
+		}
 		// 创建SimpleMailMessage对象
 		SimpleMailMessage message = new SimpleMailMessage();
 		// 邮件发送人
@@ -68,6 +72,17 @@ public class MailServiceImpl implements IMailService {
 			p.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		}
 		mailSender.setJavaMailProperties(p);
+		return true;
+	}
+
+	@Override
+	public Boolean canSendMail() {
+		// 是否开启了发件功能
+		String mailOpen = (String) configService.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_OPEN);
+		if (!ConfigConstants.STRING_TRUE.equals(mailOpen)) {
+
+			return false;
+		}
 		return true;
 	}
 

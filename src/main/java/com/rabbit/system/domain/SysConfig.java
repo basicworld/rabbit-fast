@@ -11,6 +11,8 @@ public class SysConfig {
 
     private String cvalue;
 
+    private String ctype;
+
     private Boolean systemBuilt;
 
     private Date createTime;
@@ -53,6 +55,14 @@ public class SysConfig {
 
     public void setCvalue(String cvalue) {
         this.cvalue = cvalue == null ? null : cvalue.trim();
+    }
+
+    public String getCtype() {
+        return ctype;
+    }
+
+    public void setCtype(String ctype) {
+        this.ctype = ctype == null ? null : ctype.trim();
     }
 
     public Boolean getSystemBuilt() {

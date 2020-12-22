@@ -53,6 +53,9 @@ public class SysConfigController {
 		if (!ValidUtils.isValidEmail(email)) {
 			return AjaxResult.error("邮箱格式错误");
 		}
+		if(!mailService.canSendMail()) {
+			return AjaxResult.error("已关闭邮件功能，请打开后重试！");
+		}
 		AsyncManager.me().execute(AsyncFactory.sendSimpleMail(email.trim(), MailConstants.SUBJECT_OF_TEST,
 				MailConstants.CONTENT_OF_TEST));
 		return AjaxResult.success(StringUtils.format("尝试发送邮件给{}，请注意查收", email));
