@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
 import com.rabbit.common.util.BCryptUtils;
+import com.rabbit.common.util.BaseUtils;
 import com.rabbit.common.util.RSAUtils;
 import com.rabbit.common.util.SecurityUtils;
 import com.rabbit.common.util.ServletUtils;
@@ -33,6 +34,7 @@ import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
+import com.rabbit.system.constant.AccountConstants;
 import com.rabbit.system.constant.ConfigConstants;
 import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.domain.SysAccount;
@@ -277,12 +279,16 @@ public class SysUserController extends BaseController {
 		userService.updateSelective(user);
 
 		// 更新用户成功，尝试发送邮件通知
-		if (StringUtils.isNotEmpty(userDTO.getEmail())) {
+		SysAccount queryParam = new SysAccount();
+		queryParam.setCategory(AccountConstants.CATEGORY_EMAIL);
+		queryParam.setUserId(userDTO.getUserId());
+		SysAccount emailAccount = BaseUtils.firstItemOfList(accountService.listByCategoryAndUserId(queryParam));
+		if (StringUtils.isNotNull(emailAccount)) {
 			String subject = (String) configService
 					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_SUBJECT_OF_EDIT_USER_SUCCESS);
 			String content = (String) configService
 					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_CONTENT_OF_EDIT_USER_SUCCESS);
-			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(), subject, content));
+			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(emailAccount.getOpenCode(), subject, content));
 		}
 
 		return AjaxResult.success();
@@ -327,12 +333,16 @@ public class SysUserController extends BaseController {
 		userService.updateSelective(user);
 
 		// 更新用户成功，尝试发送邮件通知
-		if (StringUtils.isNotEmpty(userDTO.getEmail())) {
+		SysAccount queryParam = new SysAccount();
+		queryParam.setCategory(AccountConstants.CATEGORY_EMAIL);
+		queryParam.setUserId(userDTO.getUserId());
+		SysAccount emailAccount = BaseUtils.firstItemOfList(accountService.listByCategoryAndUserId(queryParam));
+		if (StringUtils.isNotNull(emailAccount)) {
 			String subject = (String) configService
 					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_SUBJECT_OF_RESET_PASSWORD_SUCCESS);
 			String content = (String) configService
 					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_CONTENT_OF_RESET_PASSWORD_SUCCESS);
-			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(), subject, content));
+			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(emailAccount.getOpenCode(), subject, content));
 		}
 
 		return AjaxResult.success();

@@ -29,7 +29,9 @@ public class SysConfigServiceImpl implements ISysConfigService {
 
 	@Override
 	public List<SysConfig> listAll() {
-		return configMapper.selectByExample(new SysConfigExample());
+		SysConfigExample example = new SysConfigExample();
+		example.createCriteria().andDeletedEqualTo(false);
+		return configMapper.selectByExample(example);
 	}
 
 	@Override
@@ -85,7 +87,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
 		for (SysConfig item : configList) {
 			SysConfigExample example = new SysConfigExample();
 			example.createCriteria().andCkeyEqualTo(item.getCkey().trim());
-			
+
 			// 只能更新key、value这两个参数
 			SysConfig updatePram = new SysConfig();
 			updatePram.setCkey(item.getCkey().trim());
