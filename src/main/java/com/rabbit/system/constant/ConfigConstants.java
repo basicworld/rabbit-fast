@@ -27,4 +27,19 @@ public class ConfigConstants {
 	/** SMTP 配置键名：开启发邮件功能 */
 	public static final String KEY_OF_MAIL_OPEN = "my.mail.smtp.open";
 
+	/** 邮件标题键名：新增用户成功 */
+	public static final String KEY_OF_MAIL_SUBJECT_OF_ADD_USER_SUCCESS = "my.key.mail.subject.user_add_success";
+	/** 邮件内容键名：新增用户成功 */
+	public static final String KEY_OF_MAIL_CONTENT_OF_ADD_USER_SUCCESS = "my.key.mail.content.user_add_success";
+
+	/** 邮件标题键名：修改用户成功 */
+	public static final String KEY_OF_MAIL_SUBJECT_OF_EDIT_USER_SUCCESS = "my.key.mail.subject.user_edit_success";
+	/** 邮件内容键名：修改用户成功 */
+	public static final String KEY_OF_MAIL_CONTENT_OF_EDIT_USER_SUCCESS = "my.key.mail.content.user_edit_success";
+
+	/** 邮件标题键名：重置密码成功 */
+	public static final String KEY_OF_MAIL_SUBJECT_OF_RESET_PASSWORD_SUCCESS = "my.key.mail.subject.reset_password_success";
+	/** 邮件内容键名：重置密码成功 */
+	public static final String KEY_OF_MAIL_CONTENT_OF_RESET_PASSWORD_SUCCESS = "my.key.mail.content.reset_password_success";
+
 }

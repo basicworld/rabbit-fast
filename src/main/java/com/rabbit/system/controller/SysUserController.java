@@ -33,12 +33,13 @@ import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.framework.web.page.TableDataInfo;
 import com.rabbit.system.base.BaseController;
+import com.rabbit.system.constant.ConfigConstants;
 import com.rabbit.system.constant.LogConstants;
-import com.rabbit.system.constant.MailConstants;
 import com.rabbit.system.domain.SysAccount;
 import com.rabbit.system.domain.SysUser;
 import com.rabbit.system.domain.dto.SysUserDTO;
 import com.rabbit.system.service.ISysAccountService;
+import com.rabbit.system.service.ISysConfigService;
 import com.rabbit.system.service.ISysDeptService;
 import com.rabbit.system.service.ISysDeptUserService;
 import com.rabbit.system.service.ISysRoleService;
@@ -69,6 +70,8 @@ public class SysUserController extends BaseController {
 	TokenService tokenService;
 	@Autowired
 	ISysRoleService roleService;
+	@Autowired
+	ISysConfigService configService;
 	/**
 	 * 默认明文密码
 	 */
@@ -148,10 +151,12 @@ public class SysUserController extends BaseController {
 		}
 		userService.insertSelective(user);
 		// 创建用户成功，尝试发送邮件通知
-		if (StringUtils.isNotNull(userDTO.getEmail())) {
-			String emailContent = StringUtils.format(MailConstants.CONTENT_OF_USER_REGIST_SUCCESS, userDTO.getEmail());
-			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(),
-					MailConstants.SUBJECT_OF_USER_REGIST_SUCCESS, emailContent));
+		if (StringUtils.isNotEmpty(userDTO.getEmail())) {
+			String subject = (String) configService
+					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_SUBJECT_OF_ADD_USER_SUCCESS);
+			String content = (String) configService
+					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_CONTENT_OF_ADD_USER_SUCCESS);
+			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(), subject, content));
 		}
 		return AjaxResult.success("创建成功，默认密码：" + DEFAULT_RAW_PASSWORD);
 	}
@@ -270,6 +275,16 @@ public class SysUserController extends BaseController {
 		}
 		user.setPassword(null);
 		userService.updateSelective(user);
+
+		// 更新用户成功，尝试发送邮件通知
+		if (StringUtils.isNotEmpty(userDTO.getEmail())) {
+			String subject = (String) configService
+					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_SUBJECT_OF_EDIT_USER_SUCCESS);
+			String content = (String) configService
+					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_CONTENT_OF_EDIT_USER_SUCCESS);
+			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(), subject, content));
+		}
+
 		return AjaxResult.success();
 	}
 
@@ -310,6 +325,16 @@ public class SysUserController extends BaseController {
 			return AjaxResult.error(checkResult.getMessage());
 		}
 		userService.updateSelective(user);
+
+		// 更新用户成功，尝试发送邮件通知
+		if (StringUtils.isNotEmpty(userDTO.getEmail())) {
+			String subject = (String) configService
+					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_SUBJECT_OF_RESET_PASSWORD_SUCCESS);
+			String content = (String) configService
+					.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_MAIL_CONTENT_OF_RESET_PASSWORD_SUCCESS);
+			AsyncManager.me().execute(AsyncFactory.sendSimpleMail(userDTO.getEmail(), subject, content));
+		}
+
 		return AjaxResult.success();
 	}
 

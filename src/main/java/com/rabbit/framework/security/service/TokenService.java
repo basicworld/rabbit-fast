@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,7 +29,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
  */
 @Component
 public class TokenService {
-	private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
+	// private static final Logger logger =
+	// LoggerFactory.getLogger(TokenService.class);
 
 	// 令牌自定义标识
 	@Value("${token.header}")
@@ -62,7 +61,6 @@ public class TokenService {
 	public LoginUser getLoginUser(HttpServletRequest request) {
 		// 获取请求携带的令牌
 		String token = getToken(request);
-		logger.debug("获取的token是：" + token);
 		if (StringUtils.isNotEmpty(token)) {
 			Claims claims = parseToken(token);
 			// 解析对应的权限以及用户信息
@@ -70,7 +68,6 @@ public class TokenService {
 			String userKey = getTokenKey(uuid);
 			// 获取redis存储的token
 			LoginUser user = redisCache.getCacheObject(userKey);
-			logger.debug("获取的loginUser是：" + user);
 			return user;
 		}
 		return null;

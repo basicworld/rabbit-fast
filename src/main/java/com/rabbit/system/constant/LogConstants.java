@@ -10,7 +10,7 @@ import java.util.List;
  *
  */
 public class LogConstants {
-	
+
 	/**
 	 * 所有日志操作类型set
 	 */
@@ -35,11 +35,14 @@ public class LogConstants {
 			add(TYPE_DEL_DEPT);
 			add(TYPE_EDIT_DEPT);
 
+			add(TYPE_EDIT_CONFIG);
+			add(TYPE_RECACHE_CONFIG);
+
 			add(TYPE_OTHER);
 		}
-		
+
 	};
-	
+
 	// 操作类型：登录注册类
 	/** 登录 */
 	public static final String TYPE_LOGIN = "用户登录";
@@ -73,6 +76,11 @@ public class LogConstants {
 	public static final String TYPE_DEL_DEPT = "删除部门";
 	/** 编辑部门 */
 	public static final String TYPE_EDIT_DEPT = "编辑部门";
+
+	/** 配置系统参数 */
+	public static final String TYPE_EDIT_CONFIG = "配置系统参数";
+	/** 刷新系统参数 */
+	public static final String TYPE_RECACHE_CONFIG = "刷新系统参数";
 
 	public static final String TYPE_OTHER = "其他操作";
 

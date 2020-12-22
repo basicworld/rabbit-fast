@@ -74,10 +74,10 @@ public class SysLogServiceImpl implements ISysLogService {
 		if (StringUtils.isNotNull(log.getIsSuccess())) {
 			c1.andIsSuccessEqualTo(log.getIsSuccess());
 		}
-		if (StringUtils.isNotNull(log.getOperType())) {
+		if (StringUtils.isNotEmpty(log.getOperType())) {
 			c1.andOperTypeEqualTo(log.getOperType());
 		}
-		if (StringUtils.isNotNull(log.getUserName())) {
+		if (StringUtils.isNotEmpty(log.getUserName())) {
 			c1.andUserNameLike(SqlUtil.getFuzzQueryParam(log.getUserName()));
 		}
 		return logMapper.selectByExample(example);

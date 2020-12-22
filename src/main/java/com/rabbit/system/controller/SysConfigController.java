@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.valid.ValidUtils;
+import com.rabbit.framework.aspectj.annotation.Log;
 import com.rabbit.framework.manager.AsyncManager;
 import com.rabbit.framework.manager.factory.AsyncFactory;
 import com.rabbit.framework.web.domain.AjaxResult;
+import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.constant.MailConstants;
 import com.rabbit.system.domain.SysConfig;
 import com.rabbit.system.service.IMailService;
@@ -53,7 +55,7 @@ public class SysConfigController {
 		if (!ValidUtils.isValidEmail(email)) {
 			return AjaxResult.error("邮箱格式错误");
 		}
-		if(!mailService.canSendMail()) {
+		if (!mailService.canSendMail()) {
 			return AjaxResult.error("已关闭邮件功能，请打开后重试！");
 		}
 		AsyncManager.me().execute(AsyncFactory.sendSimpleMail(email.trim(), MailConstants.SUBJECT_OF_TEST,
@@ -78,6 +80,7 @@ public class SysConfigController {
 	 * 
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_RECACHE_CONFIG)
 	@PreAuthorize("@ss.hasPermi('system:config')")
 	@GetMapping("/recache")
 	public AjaxResult reCache() {
@@ -96,6 +99,7 @@ public class SysConfigController {
 	 * @param configList
 	 * @return
 	 */
+	@Log(operateType = LogConstants.TYPE_EDIT_CONFIG)
 	@PreAuthorize("@ss.hasPermi('system:config')")
 	@PutMapping
 	public AjaxResult updateMultipleConfig(@RequestBody List<SysConfig> configList) {

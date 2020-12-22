@@ -30,7 +30,7 @@ public class MailServiceImpl implements IMailService {
 
 	@Override
 	public ValidResult sendSimpleMail(String to, String subject, String content) {
-		if(!canSendMail()) {
+		if (!canSendMail()) {
 			logger.warn("未开启邮件发送功能！");
 			return ValidResult.error("未开启邮件发送功能！");
 		}
@@ -67,8 +67,8 @@ public class MailServiceImpl implements IMailService {
 		mailSender.setUsername(username);
 		mailSender.setPassword(password);
 		Properties p = new Properties();
-		p.setProperty("mail.smtp.auth", "true");
-		if ("true".equals(userSSL)) {
+		p.setProperty("mail.smtp.auth", ConfigConstants.STRING_TRUE);
+		if (ConfigConstants.STRING_TRUE.equals(userSSL)) {
 			p.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		}
 		mailSender.setJavaMailProperties(p);
