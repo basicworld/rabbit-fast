@@ -200,7 +200,7 @@ public class SysAccountServiceImpl implements ISysAccountService {
 					&& ValidUtils.isAllNumberOrSmallcaseAlphaBet(username)
 					&& ValidUtils.isStartWithSmallcaseAlphaBet(username);
 			if (!formatCheckOk) {
-				return ValidResult.error("用户名格式异常，请核对正确格式：5-30长度、全小写字母或数字、字母开头");
+				return ValidResult.error("用户名格式异常，要求为5-30长度、只包含小写字母或数字、以字母开头：" + username);
 			}
 		}
 		if (AccountConstants.CATEGORY_IDCARD == account.getCategory()) {

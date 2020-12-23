@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rabbit.common.constant.ResultConstants;
 import com.rabbit.common.core.text.StrFormatter;
 import com.rabbit.common.util.BCryptUtils;
+import com.rabbit.common.util.BaseUtils;
 import com.rabbit.common.util.RSAUtils;
 import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
@@ -30,6 +31,7 @@ import com.rabbit.framework.security.domain.LoginUser;
 import com.rabbit.framework.security.service.SysLoginService;
 import com.rabbit.framework.security.service.TokenService;
 import com.rabbit.framework.web.domain.AjaxResult;
+import com.rabbit.system.constant.AccountConstants;
 import com.rabbit.system.constant.LogConstants;
 import com.rabbit.system.domain.Captcha;
 import com.rabbit.system.domain.SysAccount;
@@ -156,7 +158,12 @@ public class SysPersonalController {
 		updateDTO.setNickname(userDTO.getNickname());
 		updateDTO.setPhone(userDTO.getPhone());
 		updateDTO.setEmail(userDTO.getEmail());
-		updateDTO.setUsername(loginUser.getUsername());// 用户名不能删除
+		// 用户名不能删除、不能修改
+		SysAccount queryParam = new SysAccount();
+		queryParam.setCategory(AccountConstants.CATEGORY_USERNAME);
+		queryParam.setUserId(loginUser.getUser().getId());
+		String username = BaseUtils.firstItemOfList(accountService.listByCategoryAndUserId(queryParam)).getOpenCode();
+		updateDTO.setUsername(username);
 		SysUser user = userService.dto2User(updateDTO);
 		logger.info("待更新用户信息：" + user);
 		// 校验待更新参数是否合法
