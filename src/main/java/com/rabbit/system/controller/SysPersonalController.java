@@ -205,6 +205,8 @@ public class SysPersonalController {
 		data.put("nickname", dto.getNickname());
 		data.put("phone", dto.getPhone());
 		data.put("email", dto.getEmail());
+		data.put("username", dto.getUsername());
+		data.put("deptName", dto.getDeptName());
 
 		return AjaxResult.success(data);
 	}
