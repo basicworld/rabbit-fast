@@ -23,11 +23,6 @@ import junit.framework.TestCase;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class ISysUserServiceTest {
-	/**
-	 * 默认明文密码
-	 */
-	@Value("${user.defaultPassword}")
-	private String DEFAULT_RAW_PASSWORD;
 
 	@Value("${rsa.publicKey}")
 	private String rsaPublicKey;
@@ -76,8 +71,8 @@ public class ISysUserServiceTest {
 
 		// 初始化密码设置
 		// 进行加密
-        BCryptPasswordEncoder encoder =new BCryptPasswordEncoder();
-		String encodePassword = encoder.encode(DEFAULT_RAW_PASSWORD);
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		String encodePassword = encoder.encode("123456");
 		SysUser user = userService.dto2User(userDTO);
 		user.setPassword(encodePassword);
 		System.out.println("encodePassword=" + encodePassword);

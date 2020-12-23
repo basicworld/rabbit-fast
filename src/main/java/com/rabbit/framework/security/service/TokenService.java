@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.rabbit.common.constant.BaseConstants;
@@ -16,6 +15,8 @@ import com.rabbit.common.util.ServletUtils;
 import com.rabbit.common.util.StringUtils;
 import com.rabbit.framework.redis.RedisCache;
 import com.rabbit.framework.security.domain.LoginUser;
+import com.rabbit.system.constant.ConfigConstants;
+import com.rabbit.system.service.ISysConfigService;
 
 import eu.bitwalker.useragentutils.UserAgent;
 import io.jsonwebtoken.Claims;
@@ -29,20 +30,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
  */
 @Component
 public class TokenService {
-	// private static final Logger logger =
-	// LoggerFactory.getLogger(TokenService.class);
-
-	// 令牌自定义标识
-	@Value("${token.header}")
-	private String header;
-
-	// 令牌秘钥
-	@Value("${token.secret}")
-	private String secret;
-
-	// 令牌有效期（默认30分钟）
-	@Value("${token.expireTime}")
-	private int expireTime;
+	@Autowired
+	ISysConfigService configService;
 
 	protected static final long MILLIS_SECOND = 1000;
 
@@ -129,11 +118,13 @@ public class TokenService {
 	 * @param loginUser 登录信息
 	 */
 	public void refreshToken(LoginUser loginUser) {
+		int EXPIRE_TIME = Integer
+				.parseInt(configService.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_TOKEN_EXPIRE_TIME));
 		loginUser.setLoginTime(System.currentTimeMillis());
-		loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
+		loginUser.setExpireTime(loginUser.getLoginTime() + EXPIRE_TIME * MILLIS_MINUTE);
 		// 根据uuid将loginUser缓存
 		String userKey = getTokenKey(loginUser.getToken());
-		redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
+		redisCache.setCacheObject(userKey, loginUser, EXPIRE_TIME, TimeUnit.MINUTES);
 	}
 
 	/**
@@ -157,7 +148,8 @@ public class TokenService {
 	 * @return 令牌
 	 */
 	private String createToken(Map<String, Object> claims) {
-		String token = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, secret).compact();
+		final String SECRET = (String) configService.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_TOKEN_SECRET);
+		String token = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, SECRET).compact();
 		return token;
 	}
 
@@ -168,7 +160,8 @@ public class TokenService {
 	 * @return 数据声明
 	 */
 	private Claims parseToken(String token) {
-		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+		final String SECRET = (String) configService.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_TOKEN_SECRET);
+		return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
 	}
 
 	/**
@@ -189,7 +182,8 @@ public class TokenService {
 	 * @return token
 	 */
 	private String getToken(HttpServletRequest request) {
-		String token = request.getHeader(header);
+		final String HEADER = (String) configService.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_TOKEN_HEADER);
+		String token = request.getHeader(HEADER);
 		if (StringUtils.isNotEmpty(token) && token.startsWith(BaseConstants.TOKEN_PREFIX)) {
 			token = token.replace(BaseConstants.TOKEN_PREFIX, "");
 		}

@@ -10,6 +10,15 @@ public class ConfigConstants {
 	public static final String STRING_TRUE = "true";
 	public static final String STRING_FALSE = "false";
 
+	/** 令牌自定义标识 */
+	public static final String KEY_OF_TOKEN_HEADER = "my.token.header";
+	/** 令牌秘钥 */
+	public static final String KEY_OF_TOKEN_SECRET = "my.token.secret";
+	/** 令牌有效期(分钟) */
+	public static final String KEY_OF_TOKEN_EXPIRE_TIME = "my.token.expire_time";
+	/** 新创建用户默认密码 */
+	public static final String KEY_OF_USER_DEFAULT_PASSWORD = "my.user.default_password";
+
 	/** name of PropertiesPropertySource */
 	public static final String NAME_OF_DB_PROPERTY_SOURCE = "system-config";
 	/** SMTP 配置键名：邮箱服务器 */

@@ -74,11 +74,6 @@ public class SysUserController extends BaseController {
 	ISysRoleService roleService;
 	@Autowired
 	ISysConfigService configService;
-	/**
-	 * 默认明文密码
-	 */
-	@Value("${user.defaultPassword}")
-	private String DEFAULT_RAW_PASSWORD;
 
 	@Value("${rsa.privateKey}")
 	private String rsaPrivateKey;
@@ -121,6 +116,10 @@ public class SysUserController extends BaseController {
 	@PostMapping
 	public AjaxResult add(@Validated @RequestBody SysUserDTO userDTO) {
 		logger.debug("新增用户...");
+
+		// 创建用户的默认密码
+		final String DEFAULT_RAW_PASSWORD = (String) configService
+				.selectByConfigKeyFromCache(ConfigConstants.KEY_OF_USER_DEFAULT_PASSWORD);
 
 		// 非管理员不能创建管理员账号
 		LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());

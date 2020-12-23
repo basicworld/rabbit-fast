@@ -89,7 +89,7 @@ public class SysPersonalController {
 		cap.setCode(loginBody.getCode());
 		cap.setUuid(loginBody.getUuid());
 		if (!captchaService.validate(cap)) {
-			return AjaxResult.error("验证码错误");
+			return AjaxResult.error("验证码错误或验证码已失效");
 		}
 
 		// 用户名密码验证，并生成token

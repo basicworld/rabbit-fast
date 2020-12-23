@@ -44,6 +44,6 @@ public interface ISysConfigService extends BaseService<SysConfig> {
 	 * @param configKey
 	 * @return
 	 */
-	Object selectByConfigKeyFromCache(String configKey);
+	String selectByConfigKeyFromCache(String configKey);
 
 }

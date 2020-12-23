@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.rabbit.common.util.StringUtils;
 import com.rabbit.common.util.file.FileUtils;
 import com.rabbit.framework.web.domain.AjaxResult;
 import com.rabbit.system.constant.ConfigConstants;

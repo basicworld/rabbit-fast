@@ -49,10 +49,8 @@ public class SysConfigServiceImpl implements ISysConfigService {
 	}
 
 	@Override
-	public Object selectByConfigKeyFromCache(String configKey) {
-		Object redisResult = redisCache.getCacheObject(this.getRedisConfigKey(configKey));
-
-		return redisResult;
+	public String selectByConfigKeyFromCache(String configKey) {
+		return redisCache.getCacheObject(this.getRedisConfigKey(configKey));
 	}
 
 	@Override

@@ -36,6 +36,16 @@ public class SysRouterController {
 	TokenService tokenService;
 
 	/**
+	 * 校验后台连通性
+	 * 
+	 * @return
+	 */
+	@GetMapping("/ping")
+	public AjaxResult pong() {
+		return AjaxResult.success("I'm fine, thanks!");
+	}
+
+	/**
 	 * 获取路由列表
 	 * 
 	 * @return
