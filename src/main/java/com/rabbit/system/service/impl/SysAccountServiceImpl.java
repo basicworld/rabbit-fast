@@ -2,6 +2,8 @@ package com.rabbit.system.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -224,15 +226,52 @@ public class SysAccountServiceImpl implements ISysAccountService {
 	 */
 	@Override
 	public Integer updateByUser(SysUser user) {
-		List<SysAccount> allAccounts = user.getAllAccounts();
+		List<SysAccount> newAccounts = user.getAllAccounts();
 		Long userId = user.getId();
 		Integer count = 0;
-		// 删除用户所有账号
-		deleteByUserId(userId);
-		// 新增账号
-		for (SysAccount account : allAccounts) {
-			count += insertSelective(account);
+//		// 删除用户所有账号
+//		deleteByUserId(userId);
+//		// 新增账号
+//		for (SysAccount account : newAccounts) {
+//			count += insertSelective(account);
+//		}
+
+		List<SysAccount> existAccounts = listByUserId(userId);
+		// 找到需要删除的账号类型，并删除
+		
+		// 已存在的账号类型
+		Set<Integer> existCategorys = existAccounts.stream().map(v -> v.getCategory()).collect(Collectors.toSet());
+		// 新的账号类型
+		Set<Integer> newCategorys = newAccounts.stream().map(v -> v.getCategory()).collect(Collectors.toSet());
+		for (SysAccount existAccount : existAccounts) {
+			// 如果账号类型不在新账号类型里，则需要删除已存在的账号
+			if (!newCategorys.contains(existAccount.getCategory())) {
+				SysAccount deleteParam = new SysAccount();
+				deleteParam.setUserId(userId);
+				deleteParam.setCategory(existAccount.getCategory());
+				deleteByUserIdAndCategory(deleteParam);
+
+				existCategorys.remove(existAccount.getCategory());
+			}
 		}
+		// 新增或更新
+		for (SysAccount newAccount : newAccounts) {
+			if (existCategorys.contains(newAccount.getCategory())) {
+				// 找到这个账号，并尝试更新
+				SysAccount accountToDeUpdate = existAccounts.stream()
+						.filter(v -> v.getCategory().equals(newAccount.getCategory())).findFirst().get();
+				// 只有账号opencode变化的时候才更新
+				if (!accountToDeUpdate.getOpenCode().equals(newAccount.getOpenCode())) {
+					// 只更新opencode字段
+					accountToDeUpdate.setOpenCode(newAccount.getOpenCode());
+					count += updateSelective(accountToDeUpdate);
+				}
+			} else {
+				// 新增
+				count += insertSelective(newAccount);
+			}
+		}
+
 		return count;
 	}
 
